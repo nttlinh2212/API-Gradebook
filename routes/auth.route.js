@@ -13,10 +13,13 @@ import validate from '../middlewares/validate.mdw.js';
 dotenv.config();
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/login.json', import.meta.url)));
+const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token-google.json', import.meta.url)));
 const rfSchema = JSON.parse(await readFile(new URL('../form-schemas/rf.json', import.meta.url)));
 const  SECRET_KEY = process.env.SECRET_KEY;
+const CLIENT_ID = process.env.CLIENT_ID;
+
 router.post('/', validate(schema), async function (req, res) {
-  const user = await userService.findByUserName(req.body.username);
+  const user = await userService.findByEmail(req.body.email);
   if (user === null) {
     return res.status(401).json({
       authenticated: false
@@ -80,34 +83,52 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
     });
   }
 });
-router.post('/google', validate(schema), async function (req, res) {
+router.post('/google', validate(tokenSchema), async function (req, res) {
   
+  const token = req.body.token;
+  console.log("TOKEN",token);
 
-  
   const client = new OAuth2Client(CLIENT_ID);
-  async function verify() {
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: CLIENT_ID, 
-    });
-    const payload = ticket.getPayload();
-    const userId = payload['sub'];
+ 
+  const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID, 
+  });
+  const retPayload = ticket.getPayload();
+  console.log("PayLoad",retPayload);
+  const googleId = retPayload['sub'];
+  const exist = await userService.findByEmail(retPayload['email']);
+  let userId;
+  if(!exist){
+    const user = await userService.add({
+      googleId,
+      email:retPayload['email'],
+      firstName:retPayload['given_name'],
+      lastName:retPayload['family_name'],
+    })
+    userId = user._id;
   }
-  verify().catch(console.error);
-
-
-
-
+  else {
+    if(exist&&!exist.googleId){
+      console.log("no google id",exist, exist._id);
+      console.log(await userService.patch(exist._id, {
+        googleId
+      }));
+    }
+    userId = exist._id;
+  }
+  
+  
   const opts = {
     expiresIn: 15 * 60 // seconds
   };
   const payload = {
-    userId: user.id
+    userId
   };
   const accessToken = jwt.sign(payload,SECRET_KEY, opts);
 
   const refreshToken = randomstring.generate(80);
-  await userService.patch(user.id, {
+  await userService.patch(userId, {
     rfToken: refreshToken
   });
 

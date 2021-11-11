@@ -13,6 +13,12 @@ router.post('/', validate(schema), async function (req, res) {
   user.password = bcrypt.hashSync(user.password, 10);
   let ret;
   //-------------------validate email, username
+  const duplicate = userService.findByEmail(user.email)
+  if(duplicate){
+    return res.status(400).json({
+      err: "Email is used for another account"
+    });
+  }
   try{
     ret = await userService.add(user);
   }catch(err){
@@ -30,5 +36,8 @@ router.post('/', validate(schema), async function (req, res) {
   user._id=ret._id;
   res.status(201).json(user);
 });
-
+router.get('/profile', async function (req, res) {
+  const user = await userService.findById(req.accessTokenPayload.userId)
+  res.status(201).json(user);
+});
 export default router;

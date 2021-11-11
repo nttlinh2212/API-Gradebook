@@ -2,8 +2,8 @@
 import userModel from '../models/user.model.js';
 
 const userService = {
-    async findByUserName(username) {
-        return userModel.findOne({username});
+    async findByEmail(email) {
+        return userModel.findOne({email});
     },
       
     async isValidRefreshToken (userId, refreshToken) {
@@ -12,7 +12,7 @@ const userService = {
     findAll() {
         return userModel.find();
     },
-
+   
     async findById(userId) {
         return userModel.findOne({_id:userId});
     },
