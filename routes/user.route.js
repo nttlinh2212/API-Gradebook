@@ -16,7 +16,7 @@ router.post('/', validate(schema), async function (req, res) {
   const duplicate = userService.findByEmail(user.email)
   if(duplicate){
     return res.status(400).json({
-      err: "Email is used for another account"
+      err: "Email is not available"
     });
   }
   try{
