@@ -89,12 +89,20 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
   console.log("TOKEN",token);
 
   const client = new OAuth2Client(CLIENT_ID);
- 
-  const ticket = await client.verifyIdToken({
+  let retPayload;
+  try{
+    const ticket = await client.verifyIdToken({
       idToken: token,
       audience: CLIENT_ID, 
-  });
-  const retPayload = ticket.getPayload();
+    });
+    retPayload = ticket.getPayload();
+  }catch(err){
+    return res.status(401).json({
+      message: 'Invalid Google token.'
+    });
+  }
+  
+  
   console.log("PayLoad",retPayload);
   const googleId = retPayload['sub'];
   const exist = await userService.findByEmail(retPayload['email']);
