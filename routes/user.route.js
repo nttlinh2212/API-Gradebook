@@ -13,7 +13,8 @@ router.post('/', validate(schema), async function (req, res) {
   user.password = bcrypt.hashSync(user.password, 10);
   let ret;
   //-------------------validate email, username
-  const duplicate = userService.findByEmail(user.email)
+  const duplicate = await userService.findByEmail(user.email)
+  console.log(duplicate);
   if(duplicate){
     return res.status(400).json({
       err: "Email is not available"
