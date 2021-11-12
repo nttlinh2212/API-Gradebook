@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
     googleId: String,
     firstName: String,
     lastName: String,
+    name:String,
     rfToken: String,   
 },
 {

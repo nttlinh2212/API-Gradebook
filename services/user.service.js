@@ -16,8 +16,16 @@ const userService = {
     async findById(userId) {
         return userModel.findOne({_id:userId});
     },
-
+    async findByIdSelected(userId) {
+        return userModel.findOne({_id:userId}).select({
+            _id:1,
+            email:1,
+            firstName:1,
+            lastName:1
+        });
+    },
     add(userObj) {
+        userObj.name = userObj.firstName+" "+userObj.lastName;
         const user =  new userModel(userObj);
         return user.save();
     },

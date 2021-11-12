@@ -4,41 +4,32 @@ import { readFile } from 'fs/promises';
 import validate from '../middlewares/validate.mdw.js';
 import classService from '../services/class.service.js';
 import classMemberService from '../services/class-member.service.js';
+import authMdw from '../middlewares/auth.mdw.js';
+import userService from '../services/user.service.js';
 
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/class.json', import.meta.url)));
 
-router.get('/', async function (req, res) {
-  const id = req.query.id || 0;
-  const classObj = await classService.findClassInfoById(id);
-  if (classObj === null) {
-    return res.status(204).end();
-  }
-  console.log("Role:",req.role,classObj)
-  const retJson = {
-    _id:classObj._id,
-    name:classObj.name,
-    description:classObj.description,
-    createdUser:classObj.createdUser,
-    role:req.role
-  }
-  console.log("Role:",req.role,retJson)
-  res.json(retJson);
-});
-router.get('/list-member', async function (req, res) {
-  const id = req.query.id || 0;
-  const listStudents = await classMemberService.findAllStudentsInAClass(id);
-  const listTeachers = await classMemberService.findAllTeachersInAClass(id);
-  const retJson = {
-    _id: id,
-    students: listStudents,
-    teachers: listTeachers,
-  }
-  res.json(retJson);
+router.get('/',authMdw.auth, async function (req, res) {
+  console.log('ROOT ROUTER: ');
+  const list = await classMemberService.findAllClassesByUser(req.accessTokenPayload.userId);
+  res.json(list);
 });
 
-
-
+router.post('/',authMdw.auth, validate(schema), async function (req, res) {
+  console.log('ROOT ROUTER: ', req.body);
+  req.body.createdUser=req.accessTokenPayload.userId;
+  const ret = await classService.add(req.body);
+  const classObj = {
+    _id: ret._id,
+    ...req.body
+  }
+  res.status(201).json(classObj);
+});
+router.get('/profile',authMdw.auth, async function (req, res) {
+  const user = await userService.findByIdSelected(req.accessTokenPayload.userId)
+  res.status(201).json(user);
+});
 // router.delete('/:id', async function (req, res) {
 //   const id = req.params.id || 0;
 //   const n = await classService.del(id);

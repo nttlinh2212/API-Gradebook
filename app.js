@@ -6,6 +6,7 @@ import connectDB  from './utils/db.js';
 import auth from './middlewares/auth.mdw.js';
 
 import classRouter from './routes/class.route.js';
+import rootRouter from './routes/root.route.js';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import dotenv from "dotenv";
@@ -23,9 +24,10 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.use('/api/auth/', authRouter);
-app.use('/api/user/', userRouter);
-app.use('/api/class/', auth, classRouter);
+app.use('/',rootRouter);
+app.use('/auth/', authRouter);
+app.use('/user/', userRouter);
+app.use('/class/', auth.authMember, classRouter);
 
 app.get('/err', function (req, res) {
   throw new Error('Error!');

@@ -14,8 +14,7 @@ const classMemberService = {
                 path:"createdUser",
                 select:{
                     _id:1,
-                    firstName:1,
-                    lastName:1
+                    name:1,
                 }
             }
         }).select({
@@ -26,7 +25,30 @@ const classMemberService = {
     async findAMemberInAClass(memberId, classId) {
         return classMemberModel.findOne({user:memberId,class:classId});
     },
-
+    async findAllStudentsInAClass(classId) {
+        return classMemberModel.find({
+            class:classId, 
+            role:"student"
+        }).populate({
+            path:"user",
+            select:{
+                _id:1,
+                name:1,
+            }
+        }).select("_id");
+    },
+    findAllTeachersInAClass(classId) {
+        return classMemberModel.find({
+            class:classId, 
+            role:"teacher"
+        }).populate({
+            path:"user",
+            select:{
+                _id:1,
+                name:1,
+            }
+        }).select("_id");
+    },
     add(classMemberObj) {
         const classMemberDoc =  new classMemberModel(classMemberObj);
         return classMemberDoc.save();

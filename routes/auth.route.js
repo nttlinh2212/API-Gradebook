@@ -113,6 +113,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       email:retPayload['email'],
       firstName:retPayload['given_name'],
       lastName:retPayload['family_name'],
+      name:retPayload['name']
     })
     userId = user._id;
   }

@@ -11,7 +11,18 @@ const classService = {
     async findById(classId) {
         return classModel.findOne({_id:classId});
     },
-
+    async findClassInfoById(classId) {
+        return classModel.findOne({_id:classId}).populate(
+            {
+                path:"createdUser",
+                select:{name:1,_id:1}
+            })
+            // .select({
+            //     createdAt: 0,
+            //     updatedAt: 0,
+            //     __v:0
+            // });
+    },
     async add(classObj) {
         const classDoc =  new classModel(classObj);
         

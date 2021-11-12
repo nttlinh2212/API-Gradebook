@@ -37,8 +37,18 @@ router.post('/', validate(schema), async function (req, res) {
   user._id=ret._id;
   res.status(201).json(user);
 });
-router.get('/profile', async function (req, res) {
-  const user = await userService.findById(req.accessTokenPayload.userId)
-  res.status(201).json(user);
+// router.get('/profile', async function (req, res) {
+//   const user = await userService.findById(req.accessTokenPayload.userId)
+//   res.status(201).json(user);
+// });
+router.get('/update', async function (req, res) {
+  
+  const all = await userService.findAll()
+  for (const u of all) {
+    await userService.patch(u._id, {
+      name:u.firstName+" "+u.lastName,
+    })
+  }
+  res.status(201).json(all);
 });
 export default router;
