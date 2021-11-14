@@ -24,14 +24,13 @@ router.get('/classes',authMdw.auth, async function (req, res) {
 router.post('/classes',authMdw.auth, validate(schema), async function (req, res) {
   console.log('ROOT ROUTER: ', req.body);
   req.body.createdUser=req.accessTokenPayload.userId;
-
+  
   const key = randomstring.generate(8);
-
+  req.body.key=key;
 
   const ret = await classService.add(req.body);
   const classObj = {
     _id: ret._id,
-    key,
     ...req.body
   }
   res.status(201).json(classObj);

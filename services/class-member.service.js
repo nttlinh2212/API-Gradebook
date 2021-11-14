@@ -21,7 +21,13 @@ const classMemberService = {
             _id:1
         })
     },
-
+    findStudentIdInAClass(studentId,classId){
+        return classMemberModel.findOne({
+            class:classId,
+            role:"student",
+            studentId
+        });
+    },
     async findAMemberInAClass(memberId, classId) {
         return classMemberModel.findOne({user:memberId,class:classId});
     },
@@ -58,9 +64,9 @@ const classMemberService = {
     //     return classMemberModel.deleteOne({_id:classMemberId})
     // },
 
-    // patch(classMemberId, newObj) {
-    //     return classMemberModel.updateOne({_id:classMemberId},newObj);
-    // }
+    patch(classMemberId, newObj) {
+        return classMemberModel.updateOne({_id:classMemberId},newObj);
+    }
 
 }
 export default classMemberService;

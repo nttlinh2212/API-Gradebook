@@ -6,10 +6,11 @@ import classService from '../services/class.service.js';
 import classMemberService from '../services/class-member.service.js';
 import authMdw from '../middlewares/auth.mdw.js';
 import randomstring from 'randomstring';
+import userService from '../services/user.service.js';
 const router = express.Router();
-const schema = JSON.parse(await readFile(new URL('../form-schemas/class.json', import.meta.url)));
+const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 
-router.get('/:id', authMdw.authMember, async function (req, res) {
+router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
   const classObj = await classService.findClassInfoById(id);
   if (classObj === null) {
@@ -17,6 +18,7 @@ router.get('/:id', authMdw.authMember, async function (req, res) {
   }
   //console.log("Role:",req.role,classObj)
   if(req.role==="student"){
+    console.log("Student info claass");
     const retJson = {
       _id:classObj._id,
       name:classObj.name,
@@ -38,7 +40,7 @@ router.get('/:id', authMdw.authMember, async function (req, res) {
   console.log("Role:",req.role,retJson)
   res.json(retJson);
 });
-router.get('/:id/list-member', authMdw.authMember, async function (req, res) {
+router.get('/:id/list-member',authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
   const listStudents = await classMemberService.findAllStudentsInAClass(id);
   const listTeachers = await classMemberService.findAllTeachersInAClass(id);
@@ -77,14 +79,6 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
   console.log("Add member in a class:",ret)
   return res.redirect(`/class/${id}`);
 
-  // const listStudents = await classMemberService.findAllStudentsInAClass(id);
-  // const listTeachers = await classMemberService.findAllTeachersInAClass(id);
-  // const retJson = {
-  //   _id: id,
-  //   students: listStudents,
-  //   teachers: listTeachers,
-  // }
-  // res.json(retJson);
 });
 
 // router.delete('/:id', async function (req, res) {
@@ -94,6 +88,33 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
 //     affected: n
 //   });
 // });
+
+router.get('/:id/studentid',authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
+  
+  return res.status(200).json({
+    studentId: req.studentId
+  });
+});
+router.patch('/:id/studentid',validate(studentidSchema),authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
+  if(req.studentId){
+    return res.status(400).json({
+      message: "StudentID has only one change"
+    });
+  }
+  const exist = await classMemberService.findStudentIdInAClass(req.body.studentId,req.params.id);
+  if(exist){
+    return res.status(400).json({
+      message: "StudentID is not available"
+    });
+  }
+  const ret = await classMemberService.patch(req.partId,req.body)
+  res.status(201).json({
+    message:"update successfully"
+  });
+});
+
+
+
 
 router.patch('/', async function (req, res) {
   const classId = req.params.classid || 0;
