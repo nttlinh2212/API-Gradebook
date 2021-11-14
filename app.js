@@ -27,7 +27,7 @@ app.use(morgan('dev'));
 app.use('/',rootRouter);
 app.use('/auth/', authRouter);
 app.use('/user/', userRouter);
-app.use('/class/', auth.authMember, classRouter);
+app.use('/class/', classRouter);
 
 app.get('/err', function (req, res) {
   throw new Error('Error!');

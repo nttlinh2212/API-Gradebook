@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import classMemberService from '../services/class-member.service.js';
+import classService from '../services/class.service.js';
 
 
 dotenv.config();
@@ -34,22 +35,6 @@ export default{
         console.log(decoded);
         req.accessTokenPayload = decoded;
         console.log("Payload:",req.accessTokenPayload)
-        if(!req.query.id){
-          return res.status(404).json({
-            message: 'Not found'
-          });
-        }
-        console.log("Req.query.id=classid: ", req.query.id);
-        const participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,req.query.id);
-        console.log("PARTICIPATING: ",participating);
-        if(participating){
-          req.role = participating.role;
-          next();
-        }else
-          return res.status(401).json({
-            message: 'No permission'
-          });
-          
         
       } catch (err) {
         console.log(err);
@@ -62,5 +47,32 @@ export default{
         message: 'Access token not found.'
       });
     }
+
+    const id = req.params.id;
+    if(!id){
+      return res.status(404).json({
+        message: 'Not found class'
+      });
+    }
+    console.log("Req.params.id=classid: ",id );
+    let participating
+    try{
+      participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+    }catch(err){
+      return res.status(404).json({
+            message: 'Not found'
+          });
+    }
+    
+    console.log("PARTICIPATING: ",participating);
+    if(participating){ 
+      req.role = participating.role;
+      next();
+    }else
+      return res.status(401).json({
+        message: 'No permission'
+      });
+          
+        
   }
 }

@@ -47,6 +47,11 @@ router.post('/', validate(schema), async function (req, res) {
 
   res.json({
     authenticated: true,
+    _id:user._id,
+    firstName:user.firstName,
+    lastName:user.lastName,
+    name:user.name,
+    email:user.email,
     accessToken,
     refreshToken
   });
@@ -143,6 +148,11 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
 
   res.json({
     authenticated: true,
+    _id:user._id,
+    firstName:user.firstName,
+    lastName:user.lastName,
+    name:user.name,
+    email:user.email,
     accessToken,
     refreshToken
   });

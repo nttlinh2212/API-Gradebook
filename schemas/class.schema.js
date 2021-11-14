@@ -13,6 +13,9 @@ const classSchema = new mongoose.Schema({
         ref:"user",
         required:true,
     },
+    key:{
+        type:String,
+    },
 },
 {
     timestamps:true,

@@ -11,6 +11,9 @@ const classService = {
     async findById(classId) {
         return classModel.findOne({_id:classId});
     },
+    async isCorrectKey(classId,key) {
+        return classModel.findOne({_id:classId, key});
+    },
     async findClassInfoById(classId) {
         return classModel.findOne({_id:classId}).populate(
             {
