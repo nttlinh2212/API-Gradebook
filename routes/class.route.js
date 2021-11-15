@@ -9,6 +9,7 @@ import randomstring from 'randomstring';
 import dotenv from 'dotenv';
 import userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
+import renderContentEmail from '../utils/email-template.js';
 const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
@@ -177,6 +178,7 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
     role,
     classId:id,
   };
+  const className = (await classService.findById(id)).name;
   const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
   //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
   //send email
@@ -186,9 +188,9 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
   const msg = {
     to: email, // Change to your recipient
     from: fromEmail, // Change to your verified sender
-    subject: `${user.name} invited you to join this class as a ${role}`,
+    subject: `${user.name} has invited you to join ${className}`,
     text: 'if you accept that, please click link below',
-    html: `<strong>${acceptedLink}</strong>`
+    html: renderContentEmail(user.name,user.email,className,acceptedLink,role)
   }
   sgMail
     .send(msg)
