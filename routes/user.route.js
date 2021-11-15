@@ -1,7 +1,7 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import { readFile } from 'fs/promises';
 
+import { readFile } from 'fs/promises';
+import bcrypt from 'bcryptjs';
 import userService from '../services/user.service.js';
 import validate from '../middlewares/validate.mdw.js';
 import authMdw from '../middlewares/auth.mdw.js';
@@ -37,11 +37,11 @@ router.patch('/profile',validate(profileSchema),authMdw.auth, async function (re
 
 router.patch('/password',validate(passSchema),authMdw.auth, async function (req, res) {
   const user = await userService.findById(req.accessTokenPayload.userId);
-  if(!(req.body.newPass===req.body.confirmPass)){
-    return res.status(400).json({
-      message:"New password is not equal confirm password!"
-    });
-  }
+  // if(!(req.body.newPass===req.body.confirmPass)){
+  //   return res.status(400).json({
+  //     message:"New password is not equal confirm password!"
+  //   });
+  // }
   if (bcrypt.compareSync(req.body.curPass, user.password) === false) {
     return res.status(401).json({
       message:"Current password is wrong!"

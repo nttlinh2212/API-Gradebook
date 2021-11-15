@@ -111,7 +111,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
   console.log("PayLoad",retPayload);
   const googleId = retPayload['sub'];
   const exist = await userService.findByEmail(retPayload['email']);
-  let userId;
+  let userId, firstName, lastName,name, email;
   if(!exist){
     const user = await userService.add({
       googleId,
@@ -121,6 +121,10 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       name:retPayload['name']
     })
     userId = user._id;
+    firstName = user.firstName;
+    lastName = user.lastName;
+    name = user.name;
+    email = user.email; 
   }
   else {
     if(exist&&!exist.googleId){
@@ -130,6 +134,10 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       }));
     }
     userId = exist._id;
+    firstName = exist.firstName;
+    lastName = exist.lastName;
+    name = exist.name;
+    email = exist.email; 
   }
   
   
@@ -148,11 +156,11 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
 
   res.json({
     authenticated: true,
-    _id:user._id,
-    firstName:user.firstName,
-    lastName:user.lastName,
-    name:user.name,
-    email:user.email,
+    _id:userId,
+    firstName,
+    lastName,
+    name,
+    email,
     accessToken,
     refreshToken
   });

@@ -6,6 +6,7 @@ import classService from '../services/class.service.js';
 import classMemberService from '../services/class-member.service.js';
 import authMdw from '../middlewares/auth.mdw.js';
 import userService from '../services/user.service.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/class.json', import.meta.url)));
@@ -59,11 +60,11 @@ router.post('/register', validate(userSchema), async function (req, res) {
   
 
   user = {
-    id: ret[0],
+    _id: ret._id,
     ...user
   }
   delete user.password;
-  user._id=ret._id;
+  //user._id=ret._id;
   res.status(201).json(user);
 });
 
