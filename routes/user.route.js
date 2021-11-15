@@ -31,6 +31,7 @@ router.get('/profile',authMdw.auth, async function (req, res) {
   res.status(201).json(user);
 });
 router.patch('/profile',validate(profileSchema),authMdw.auth, async function (req, res) {
+  req.body.name = req.body.firstName + req.body.lastName;
   const user = await userService.patch(req.accessTokenPayload.userId,req.body)
   res.status(201).json(req.body);
 });

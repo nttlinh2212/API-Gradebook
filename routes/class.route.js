@@ -148,6 +148,26 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
   const urlFE = process.env.URL_FE_LOCAL;
   const user = await userService.findById(req.accessTokenPayload.userId);
 
+  //check xem neu da la member
+  const invitedUser = await userService.findByEmail(email);
+  console.log("invited user:",invitedUser)
+  if(invitedUser){
+    let participating;
+    try{
+      participating = await classMemberService.findAMemberInAClass(invitedUser._id,id);
+    }catch(err){
+      return res.status(404).json({
+        err: "Not found class!"
+      });
+    }
+    if(participating){
+      return res.status(404).json({
+        err: `Can not invite since ${email} is a member of this class`
+      });
+    
+    }
+  }
+  
   //create token
   const opts = {
     expiresIn: '2d' // seconds
@@ -158,6 +178,7 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
     classId:id,
   };
   const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
+  //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
   //send email
 ///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
   const acceptedLink = `${urlFE}class/join/${id}?token=${token}&role=${role}`;
@@ -184,6 +205,39 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
       });
     })
 
+ 
+});
+router.get('/:id/confirm-invite-email',authMdw.auth , async function (req, res) {
+  const id = req.params.id || 0;
+  const token = req.query.token || 0;
+  const user = await userService.findById(req.accessTokenPayload.userId);
+  //check key
+  let participating;
+  try{
+    participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+  }catch(err){
+    return res.status(404).json({
+      err: "Not found class!"
+    });
+  }
+  
+  if(participating)
+    return res.redirect(`/class/${id}`);
+  const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+  console.log("Payload:",decoded);
+  const{email,role,classId}=decoded;
+  if(id!==classId||email!==user.email){
+    return res.status(401).json({
+      err: "invalid link"
+    });
+  }
+  const className = (await classService.findById(classId)).name;
+  return res.status(200).json({
+    email,
+    role,
+    classId,
+    className,
+  });
  
 });
 router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , async function (req, res) {
