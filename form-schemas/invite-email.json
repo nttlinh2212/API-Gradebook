@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum":["student","teacher"]
+    },
+    "email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "role",
+    "email"
+  ],
+  "additionalProperties": false
+}

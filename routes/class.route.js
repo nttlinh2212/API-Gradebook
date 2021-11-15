@@ -1,14 +1,24 @@
 import express from 'express';
 import { readFile } from 'fs/promises';
-
+import sgMail  from '@sendgrid/mail';
 import validate from '../middlewares/validate.mdw.js';
 import classService from '../services/class.service.js';
 import classMemberService from '../services/class-member.service.js';
 import authMdw from '../middlewares/auth.mdw.js';
 import randomstring from 'randomstring';
+import dotenv from 'dotenv';
 import userService from '../services/user.service.js';
+import jwt from 'jsonwebtoken';
 const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
+const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
+const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
+
+dotenv.config();
+const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+
+ 
 
 router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
@@ -130,5 +140,83 @@ router.patch('/', async function (req, res) {
     all
   });
 });
+router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  const id = req.params.id || 0;
+  const email = req.body.email || 0;
+  const role = req.body.role||"student";
+  const fromEmail = process.env.EMAIL_FROM;
+  const urlFE = process.env.URL_FE_LOCAL;
+  const user = await userService.findById(req.accessTokenPayload.userId);
 
+  //create token
+  const opts = {
+    expiresIn: '2d' // seconds
+  };
+  const payload = {
+    email,
+    role,
+    classId:id,
+  };
+  const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
+  //send email
+///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
+  const acceptedLink = `${urlFE}class/join/${id}?token=${token}&role=${role}`;
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  const msg = {
+    to: email, // Change to your recipient
+    from: fromEmail, // Change to your verified sender
+    subject: `${user.name} invited you to join this class as a ${role}`,
+    text: 'if you accept that, please click link below',
+    html: `<strong>${acceptedLink}</strong>`
+  }
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent')
+      return res.status(200).json({
+        message: "Send email successfully"
+      });
+    })
+    .catch((error) => {
+      console.error(error)
+      return res.status(400).json({
+        message: "Send email fail"
+      });
+    })
+
+ 
+});
+router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , async function (req, res) {
+  const id = req.params.id || 0;
+  const token = req.body.token || 0;
+  const user = await userService.findById(req.accessTokenPayload.userId);
+  //check key
+  let participating;
+  try{
+    participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+  }catch(err){
+    return res.status(404).json({
+      err: "Not found class!"
+    });
+  }
+  
+  if(participating)
+    return res.redirect(`/class/${id}`);
+  const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+  console.log("Payload:",decoded);
+  const{email,role,classId}=decoded;
+  if(id!==classId||email!==user.email){
+    return res.status(401).json({
+      err: "invalid link"
+    });
+  }
+  const ret = await classMemberService.add({
+    user:user._id, 
+    role,
+    class:classId
+  });
+  console.log("Result of Adding new member:",ret);
+  return res.redirect(`/class/${id}`);
+ 
+});
 export default router;

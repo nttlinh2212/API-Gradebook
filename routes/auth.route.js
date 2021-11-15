@@ -13,7 +13,7 @@ import validate from '../middlewares/validate.mdw.js';
 dotenv.config();
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/login.json', import.meta.url)));
-const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token-google.json', import.meta.url)));
+const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
 const rfSchema = JSON.parse(await readFile(new URL('../form-schemas/rf.json', import.meta.url)));
 const  SECRET_KEY = process.env.SECRET_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -26,7 +26,7 @@ router.post('/', validate(schema), async function (req, res) {
     });
   }
 
-  if (bcrypt.compareSync(req.body.password, user.password) === false) {
+  if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
     return res.status(401).json({
       authenticated: false
     });
