@@ -146,7 +146,7 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
   const email = req.body.email || 0;
   const role = req.body.role||"student";
   const fromEmail = process.env.EMAIL_FROM;
-  const urlFE = process.env.URL_FE_LOCAL;
+  const urlFE = process.env.URL_FE;
   const user = await userService.findById(req.accessTokenPayload.userId);
 
   //check xem neu da la member
