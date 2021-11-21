@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "gradeStructure":{
+        "type":"array",
+        "items":{
+          "type":"object",
+          "properties": {
+              "name": {"type": "string"},
+              "point": {"type": "integer"}
+          }
+        }
+    }
+  },
+  "required": [
+    "gradeStructure"
+  ],
+  "additionalProperties": false
+}

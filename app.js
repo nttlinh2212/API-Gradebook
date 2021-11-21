@@ -17,7 +17,7 @@ dotenv.config();
 
 const PORT_FE = process.env.PORT_FE || 3000;
 app.use(cors({
-  origin: [`http://localhost:${PORT_FE}`,"https://gradebookplus.netlify.app",'http://localhost:63342'],
+  origin: [`http://localhost:${PORT_FE}`,"https://gradebookplus.netlify.app",'http://localhost:63342',"https://gradebookplus-btn01.netlify.app"],
   methods: 'GET,PATCH,POST,DELETE'
 }));
 

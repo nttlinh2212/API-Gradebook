@@ -14,6 +14,7 @@ const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
+const gradeStructureSchema = JSON.parse(await readFile(new URL('../form-schemas/grade-structure.json', import.meta.url)));
 
 dotenv.config();
 const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
@@ -274,5 +275,29 @@ router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , as
   console.log("Result of Adding new member:",ret);
   return res.redirect(`/class/${id}`);
  
+});
+router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  const classId = req.params.id || 0;
+  const structure = req.body;
+  console.log("Structure:",structure);
+  let sum = 0;
+  for (const assign of structure.gradeStructure) {
+    sum+=assign.point;
+  }
+  if(sum!=100){
+    return res.status(400).json({
+      err: "Total score is not equal to 100",
+    });
+  }
+  
+  const ret = await classService.patch(classId, {gradeStructure:structure.gradeStructure});
+  console.log("RESULT OF GRADE STRUCTURE:",ret);
+  res.status(201).json(structure);
+});
+router.get('/:id/grade-structure',authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  const classId = req.params.id || 0;
+  const ret = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
+  console.log("RESULT OF GRADE STRUCTURE:",ret);
+  res.status(201).json(ret);
 });
 export default router;

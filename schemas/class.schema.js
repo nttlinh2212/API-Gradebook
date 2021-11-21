@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+const assignmentSchema = new mongoose.Schema({
+    name: {
+        type:String,
+        required:true,
+    },
+    point:{
+        type: Number,
+        required:true,
+    }
+});
 const classSchema = new mongoose.Schema({
     name:{
         type:String,
@@ -16,6 +26,10 @@ const classSchema = new mongoose.Schema({
     key:{
         type:String,
     },
+    gradeStructure:{
+        type: Array,
+        of: assignmentSchema,
+    }
 },
 {
     timestamps:true,
