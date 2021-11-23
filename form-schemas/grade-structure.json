@@ -7,7 +7,7 @@
           "type":"object",
           "properties": {
               "name": {"type": "string"},
-              "point": {"type": "integer"}
+              "point": {"type": "number"}
           }
         }
     }

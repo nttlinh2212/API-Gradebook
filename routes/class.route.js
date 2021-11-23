@@ -284,9 +284,9 @@ router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.auth
   for (const assign of structure.gradeStructure) {
     sum+=assign.point;
   }
-  if(sum!=100){
+  if(sum>10){
     return res.status(400).json({
-      err: "Total score is not equal to 100",
+      err: "Total score is not more than 10",
     });
   }
   
