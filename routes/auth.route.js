@@ -77,13 +77,13 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
       });
     }
 
-    return res.status(401).json({
+    return res.status(403).json({
       message: 'Refresh token is revoked.'
     });
 
   } catch (err) {
     console.log(err);
-    return res.status(401).json({
+    return res.status(403).json({
       message: 'Invalid access token.'
     });
   }
