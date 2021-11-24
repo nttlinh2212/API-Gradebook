@@ -128,20 +128,33 @@ router.patch('/:id/studentid',validate(studentidSchema),authMdw.auth ,authMdw.au
 
 
 
+// router.patch('/', async function (req, res) {
+//   const classId = req.params.classid || 0;
+//   const key = req.params.key || 0;
+//   console.log(classId,"/",key);
+//   const all = await classService.findAll();
+//   for (const c of all) {
+//     const key = randomstring.generate(8);
+//     const n = await classService.patch(c._id, {key});
+//   }
+  
+//   res.json({
+//     all
+//   });
+// });
 router.patch('/', async function (req, res) {
-  const classId = req.params.classid || 0;
-  const key = req.params.key || 0;
-  console.log(classId,"/",key);
+
   const all = await classService.findAll();
   for (const c of all) {
-    const key = randomstring.generate(8);
-    const n = await classService.patch(c._id, {key});
+    const gradeStructure = [];
+    const n = await classService.patch(c._id, {gradeStructure});
   }
   
   res.json({
     all
   });
 });
+
 router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const id = req.params.id || 0;
   const email = req.body.email || 0;

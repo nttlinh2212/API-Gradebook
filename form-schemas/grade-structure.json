@@ -9,7 +9,8 @@
               "name": {"type": "string"},
               "point": {
                 "type": "number",
-                "exclusiveMinimum": 0
+                "exclusiveMinimum": 0,
+                "maximum":10
               }
           }
         }
