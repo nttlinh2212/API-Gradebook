@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "listStudents":{
+        "type":"array",
+        "items":{
+          "type":"object",
+          "properties": {
+              "studentId": {"type": "string"},
+              "fullName": {
+                "type": "string"
+              }
+          }
+        }
+    }
+  },
+  "required": [
+    "listStudents"
+  ],
+  "additionalProperties": false
+}

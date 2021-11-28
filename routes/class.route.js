@@ -5,17 +5,18 @@ import validate from '../middlewares/validate.mdw.js';
 import classService from '../services/class.service.js';
 import classMemberService from '../services/class-member.service.js';
 import authMdw from '../middlewares/auth.mdw.js';
-import randomstring from 'randomstring';
 import dotenv from 'dotenv';
 import userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
 import renderContentEmail from '../utils/email-template.js';
 import mongoose from 'mongoose';
+
 const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
 const gradeStructureSchema = JSON.parse(await readFile(new URL('../form-schemas/grade-structure.json', import.meta.url)));
+const listStudentsSchema = JSON.parse(await readFile(new URL('../form-schemas/list-students.json', import.meta.url)));
 
 dotenv.config();
 const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
@@ -316,5 +317,44 @@ router.get('/:id/grade-structure',authMdw.auth ,authMdw.authMember,authMdw.authT
   const ret = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
   console.log("RESULT OF GRADE STRUCTURE:",ret);
   res.status(200).json(ret);
+});
+//------------------------add list students---------------------------------
+router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  
+  const classId = req.params.id || 0;
+  const listStudents = req.body.listStudents;
+  //console.log("List Students:",listStudents);
+  
+  const ret = await classService.patch(classId, {listStudents});
+  //console.log("result update list students:",ret);
+  res.status(201).json(listStudents);
+
+
+
+  // const storage = multer.diskStorage({
+  //   destination: function (req, file, cb) {
+  //     cb(null, '../storage');
+  //   },
+  //   filename: function (req, file, cb) {
+  //     cb(null, file.originalname);
+  //   }
+  // });
+  // const upload = multer({ storage: storage });
+  // upload.single('listStudents')(req, res, function (err) {
+  //   console.log(req.body);
+  //   if (err) {
+  //     return res.status(400).json({
+  //       err: err
+  //     });
+  //   } else {
+  //     const list = uploadListStudent(`../storage/${req.file}`,'sheet1');
+  //     console.log(list)
+      
+  //   }
+  // });
+  
+  
+  
+  
 });
 export default router;

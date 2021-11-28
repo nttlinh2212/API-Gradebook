@@ -18,7 +18,10 @@ const classSchema = new mongoose.Schema({
     },
     studentId:{
         type:String,
-    }
+    },
+    grade:{
+        type:Object
+    },
     
 },
 {
