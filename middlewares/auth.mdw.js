@@ -10,12 +10,12 @@ export default{
     if (accessToken) {
       try {
         const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
-        console.log(decoded);
+        //console.log(decoded);
         req.accessTokenPayload = decoded;
-        console.log("Payload:",req.accessTokenPayload);
+        //console.log("Payload:",req.accessTokenPayload);
         next();
       } catch (err) {
-        console.log(err);
+        //console.log(err);
         return res.status(401).json({
           message: 'Invalid access token.'
         });
@@ -38,18 +38,18 @@ export default{
         message: 'Not found class'
       });
     }
-    console.log("Req.params.id=classid: ",id );
+    //console.log("Req.params.id=classid: ",id );
     let participating;
     try{
       participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
-      console.log("PARTICIPATING1: ",participating);
+      //console.log("PARTICIPATING1: ",participating);
     }catch(err){
       return res.status(404).json({
             message: 'Not found'
           });
     }
     
-    console.log("PARTICIPATING2: ",participating);
+    //console.log("PARTICIPATING2: ",participating);
     if(participating){
       req.partId = participating._id;
       req.role = participating.role;

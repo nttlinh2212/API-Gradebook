@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "grades":{
+        "type":"array",
+        "items":{
+          "type":"object",
+          "properties": {
+              "studentId": {"type": "string"},
+              "grade": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum":10
+              }
+          }
+        }
+    },
+    "identity":{
+      "type":"string"
+    }
+  },
+  "required": [
+    "grades","identity"
+  ],
+  "additionalProperties": false
+}

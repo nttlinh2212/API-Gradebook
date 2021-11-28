@@ -10,6 +10,7 @@ import userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
 import renderContentEmail from '../utils/email-template.js';
 import mongoose from 'mongoose';
+import gradeService from '../services/grade.service.js';
 
 const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
@@ -17,6 +18,7 @@ const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/inv
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
 const gradeStructureSchema = JSON.parse(await readFile(new URL('../form-schemas/grade-structure.json', import.meta.url)));
 const listStudentsSchema = JSON.parse(await readFile(new URL('../form-schemas/list-students.json', import.meta.url)));
+const studentGradesSchema = JSON.parse(await readFile(new URL('../form-schemas/student-grades.json', import.meta.url)));
 
 dotenv.config();
 const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
@@ -323,6 +325,20 @@ router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,au
   
   const classId = req.params.id || 0;
   const listStudents = req.body.listStudents;
+
+  //----------------check duplicate studentid------------------------
+
+  var valueArr = listStudents.map(function(item){ return item.studentId });
+  var isDuplicate = valueArr.some(function(item, idx){ 
+      return valueArr.indexOf(item) != idx 
+  });
+  if(isDuplicate){
+    return res.status(400).json({
+      err: `Duplicate StudentID`,
+    });
+  }
+  //----------------done check duplicate studentid-------------------
+
   //console.log("List Students:",listStudents);
   
   const ret = await classService.patch(classId, {listStudents});
@@ -356,5 +372,65 @@ router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,au
   
   
   
+});
+router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  
+  const classId = req.params.id || 0;
+  const grades = req.body.grades;
+  const identity = req.body.identity;
+  console.log("Grade, Identity:",grades,identity)
+  //---------------check identity------------------------------------
+  const check = await classService.findOneGrade(classId,identity);
+  if(!check){
+    return res.status(400).json({
+      err: 'Grade do not exist in Grade Structure',
+    });
+  }
+  console.log("CHECK identity:",check);
+  //---------------done check identity-------------------------------
+  //----------------check duplicate studentid------------------------
+
+  var valueArr = grades.map(function(item){ return item.studentId });
+  var isDuplicate = valueArr.some(function(item, idx){ 
+      return valueArr.indexOf(item) != idx 
+  });
+  if(isDuplicate){
+    return res.status(400).json({
+      err: `Duplicate StudentID`,
+    });
+  }
+  //----------------done check duplicate studentid-------------------
+  
+  //----------------check student id not in list class --------------
+  for (const s of grades) {
+    const exist = await classService.findStudentIdInListStudents(classId,s.studentId);
+    console.log("EXIT STUDENTID",exist);
+    if(!exist){
+      return res.status(400).json({
+        err: `${s.studentId} is not in class`,
+      });
+    }
+  }
+  //----------------done check student id not in list class-----------
+  
+  //----------------update grades for all submited students-----------
+
+  const ret = [];
+  for (const s of grades) {
+    const condition = {
+      studentId:s.studentId,
+      class:classId,
+      gradeIdentity: identity,
+    }
+    const newInfo = {
+      point: s.grade
+    } 
+   const one = await gradeService.addIfNotExistElseUpdate(condition,newInfo);
+   ret.push(one);
+  }
+
+
+  //----------------done update grades for all submited students------
+  res.status(201).json(ret);
 });
 export default router;
