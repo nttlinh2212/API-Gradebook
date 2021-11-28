@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
 import renderContentEmail from '../utils/email-template.js';
+import mongoose from 'mongoose';
 const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
@@ -294,8 +295,11 @@ router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.auth
   const structure = req.body;
   console.log("Structure:",structure);
   let sum = 0;
-  for (const assign of structure.gradeStructure) {
-    sum+=assign.point;
+  for (let i = 0;i< structure.gradeStructure.length;i++) {
+    sum+=structure.gradeStructure[i].point;
+    if(!structure.gradeStructure[i].identity){
+      structure.gradeStructure[i].identity = new mongoose.Types.ObjectId();//randomstring.generate(10); 
+    }
   }
   if(sum>10){
     return res.status(400).json({
@@ -311,6 +315,6 @@ router.get('/:id/grade-structure',authMdw.auth ,authMdw.authMember,authMdw.authT
   const classId = req.params.id || 0;
   const ret = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
   console.log("RESULT OF GRADE STRUCTURE:",ret);
-  res.status(201).json(ret);
+  res.status(200).json(ret);
 });
 export default router;

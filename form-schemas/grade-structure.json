@@ -11,7 +11,8 @@
                 "type": "number",
                 "exclusiveMinimum": 0,
                 "maximum":10
-              }
+              },
+              "identity": {"type": "string"}
           }
         }
     }

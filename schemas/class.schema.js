@@ -8,7 +8,11 @@ const assignmentSchema = new mongoose.Schema({
     point:{
         type: Number,
         required:true,
-    }
+    },
+    identity: {
+        type:String,
+        required:true
+    },
 });
 const classSchema = new mongoose.Schema({
     name:{
