@@ -449,7 +449,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   //----------------done update grades for all submited students------
   res.status(201).json(ret);
 });
-router.get('/:id/test',authMdw.auth ,authMdw.authMember, async function (req, res) {
+router.get('/:id/grades-board',authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
   const classObj = await classService.findClassInfoById(id);
   if (classObj === null) {

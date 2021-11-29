@@ -76,7 +76,7 @@ const classService = {
         if(!listStudents)
             return[];
         const gradeStructure = classInfo.gradeStructure;
-        console.log("GradeStructure OBJECT:",gradeStructure);
+        //console.log("GradeStructure OBJECT:",gradeStructure);
         let identity_point = new Map();
         let identity_grade = new Map();
         let sample = [];
@@ -111,17 +111,17 @@ const classService = {
             let total = 0;
             //let newGrades = [].concat(sample);
             let newGrades = JSON.parse(JSON.stringify(sample))
-            console.log("AFTER CLONE:",newGrades)
+            //console.log("AFTER CLONE:",newGrades)
             
             const gradesOfAStudent = await gradeService.findGradesOfAStudent(s.studentId,classId);
-            console.log("Grdae of A Student in db:",gradesOfAStudent);
+            //console.log("Grdae of A Student in db:",gradesOfAStudent);
             for (const g of gradesOfAStudent) {
                 newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
                 total+=identity_point.get(g.gradeIdentity)*g.point/10;
             }
-            console.log("Student OBJECT:",s);
-            console.log("NEW OBJECT:",newGrades);
-            console.log("TOTAL GRADE:",total);
+            //console.log("Student OBJECT:",s);
+            //console.log("NEW OBJECT:",newGrades);
+            //console.log("TOTAL GRADE:",total);
             newObj.grades = newGrades;
             newObj.total=total;
             result.push(newObj)
