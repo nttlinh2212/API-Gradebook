@@ -66,6 +66,13 @@ const classService = {
     },
     patchGeneral(condition, newObj) {
         return classModel.updateOne(condition,newObj);
+    },
+    async getGradesOfAllStudents(classId){
+        const classInfo = await this.findById(classId);
+        if(!listStudents)
+            return[];
+        const listStudents = classInfo.listStudents;
+
     }
 
 }

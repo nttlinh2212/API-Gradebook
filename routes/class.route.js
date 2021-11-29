@@ -378,7 +378,23 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   const classId = req.params.id || 0;
   const grades = req.body.grades;
   const identity = req.body.identity;
-  console.log("Grade, Identity:",grades,identity)
+  //console.log("Grade, Identity:",grades,identity)
+  //---------------check format grade is number----------------------
+  for (const s of grades) {
+    let grade;
+    try {
+      grade =+s.grade;
+      //console.log("GRDAE:",grade)
+      if(isNaN(grade))
+        throw new Error("Grade is not number")
+      if(grade>10||grade<0)
+        throw new Error("Grade is not more than 10 or less than 0")
+    } catch (error) {
+      return res.status(400).json({
+        err: "Invalid grade",
+      });
+    }
+  }
   //---------------check identity------------------------------------
   const check = await classService.findOneGrade(classId,identity);
   if(!check){
@@ -386,7 +402,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
       err: 'Grade do not exist in Grade Structure',
     });
   }
-  console.log("CHECK identity:",check);
+  //console.log("CHECK identity:",check);
   //---------------done check identity-------------------------------
   //----------------check duplicate studentid------------------------
 

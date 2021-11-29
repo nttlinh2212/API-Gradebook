@@ -8,9 +8,8 @@
           "properties": {
               "studentId": {"type": "string"},
               "grade": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum":10
+                "type": "string"
+
               }
           }
         }
