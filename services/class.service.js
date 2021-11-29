@@ -1,6 +1,7 @@
 
 import classModel from '../models/class.model.js';
 import classMemberService from './class-member.service.js';
+import gradeService from './grade.service.js';
 
 
 const classService = {
@@ -69,9 +70,65 @@ const classService = {
     },
     async getGradesOfAllStudents(classId){
         const classInfo = await this.findById(classId);
-        if(!listStudents)
+        if(!classInfo)
             return[];
         const listStudents = classInfo.listStudents;
+        if(!listStudents)
+            return[];
+        const gradeStructure = classInfo.gradeStructure;
+        console.log("GradeStructure OBJECT:",gradeStructure);
+        let identity_point = new Map();
+        let identity_grade = new Map();
+        let sample = [];
+        let i = 0;
+        for (const assign of gradeStructure) {
+            const element = {
+                name:assign.name,
+                identity:assign.identity,
+                point:null
+            }
+            identity_point.set(assign.identity, assign.point);//point la poin of grade structure
+            identity_grade.set(assign.identity, i);
+            sample.push(element);
+            i++;
+        }
+        let result = [];
+        for (const s of listStudents) {
+            let newObj = {};
+            newObj.studentId=s.studentId
+            //-----------------map to account----------------------------
+            const rawInfoStudent = await classMemberService.findInfoStudentByStudentId(s.studentId,classId)
+            //console.log(rawInfoStudent);
+            if(rawInfoStudent)
+                newObj.account=rawInfoStudent.user;
+            else
+                newObj.account=null;
+            // newObj.account={
+            //     name:,
+            //     _id
+            // }
+            //-----------------done map to account-----------------------
+            let total = 0;
+            //let newGrades = [].concat(sample);
+            let newGrades = JSON.parse(JSON.stringify(sample))
+            console.log("AFTER CLONE:",newGrades)
+            
+            const gradesOfAStudent = await gradeService.findGradesOfAStudent(s.studentId,classId);
+            console.log("Grdae of A Student in db:",gradesOfAStudent);
+            for (const g of gradesOfAStudent) {
+                newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
+                total+=identity_point.get(g.gradeIdentity)*g.point/10;
+            }
+            console.log("Student OBJECT:",s);
+            console.log("NEW OBJECT:",newGrades);
+            console.log("TOTAL GRADE:",total);
+            newObj.grades = newGrades;
+            newObj.total=total;
+            result.push(newObj)
+            
+        }
+        
+        return result;
 
     }
 

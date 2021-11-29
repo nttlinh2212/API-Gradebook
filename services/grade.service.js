@@ -7,7 +7,12 @@ const gradeService = {
     findAll() {
         return gradeModel.find();
     },
-    
+    findGradesOfAStudent(studentId,classId) {
+        return gradeModel.find({
+            studentId,
+            class:classId
+        });
+    },
     async findById(gradeId) {
         return gradeModel.findOne({_id:gradeId});
     },

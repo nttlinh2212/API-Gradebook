@@ -28,6 +28,19 @@ const classMemberService = {
             studentId
         });
     },
+    findInfoStudentByStudentId(studentId,classId){
+        return classMemberModel.findOne({
+            class:classId,
+            role:"student",
+            studentId
+        }).populate({
+            path:"user",
+            select:{
+                _id:1,
+                name:1,
+            }
+        }).select("_id");
+    },
     async findAMemberInAClass(memberId, classId) {
         return classMemberModel.findOne({user:memberId,class:classId});
     },
