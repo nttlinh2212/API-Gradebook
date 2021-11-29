@@ -19,6 +19,7 @@ const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.jso
 const gradeStructureSchema = JSON.parse(await readFile(new URL('../form-schemas/grade-structure.json', import.meta.url)));
 const listStudentsSchema = JSON.parse(await readFile(new URL('../form-schemas/list-students.json', import.meta.url)));
 const studentGradesSchema = JSON.parse(await readFile(new URL('../form-schemas/student-grades.json', import.meta.url)));
+const cellGradesBoardSchema = JSON.parse(await readFile(new URL('../form-schemas/cell-grades-board.json', import.meta.url)));
 
 dotenv.config();
 const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
@@ -449,13 +450,42 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   //----------------done update grades for all submited students------
   res.status(201).json(ret);
 });
-router.get('/:id/grades-board',authMdw.auth ,authMdw.authMember, async function (req, res) {
+router.get('/:id/grades-board',authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const id = req.params.id || 0;
-  const classObj = await classService.findClassInfoById(id);
-  if (classObj === null) {
-    return res.status(204).end();
-  }
   const ret = await classService.getGradesOfAllStudents(id);
-  res.json(ret);
+  res.status(200).json(ret);
+});
+
+router.patch('/:id/cell-grades-board',validate(cellGradesBoardSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+  const {identity,point,studentId}=req.body;
+  const classId = req.params.id || 0;
+  //---------------------------check studentid in class--------------------------
+  const exist1 = await classService.findStudentIdInListStudents(classId,studentId);
+  console.log("StudentId in this class", studentId, classId, exist1);
+  if(!exist1){
+    return res.status(400).json({
+      err: `Do not have ${studentId} in this class`,
+    });
+  }
+  //----------------------------check identity in grade structure-----------------
+  const exist2 = await classService.findOneGrade(classId,identity)
+  if(!exist2){
+    return res.status(400).json({
+      err: `Do not have this assignment in this class`,
+    });
+  }
+  //-----------------------------update grade of an assignmnet of a student--------
+  const condition = {
+    studentId,
+    class:classId,
+    gradeIdentity: identity,
+  }
+  const newInfo = {
+    point
+  } 
+ await gradeService.addIfNotExistElseUpdate(condition,newInfo);
+ //------------------------------get info grades of student to return--------------
+  const ret = await classService.getGradesOfAtudents(classId,studentId)
+  res.status(201).json(ret);
 });
 export default router;

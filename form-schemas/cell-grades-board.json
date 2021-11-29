@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "studentId": {
+      "type": "string"
+    },
+    "identity": {
+      "type": "string"
+    },
+    "point": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "studentId",
+    "identity",
+    "point"
+  ],
+  "additionalProperties": false
+}

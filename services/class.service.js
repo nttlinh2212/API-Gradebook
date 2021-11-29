@@ -130,6 +130,65 @@ const classService = {
         
         return result;
 
+    },
+    async getGradesOfAtudents(classId,studentId){
+        const classInfo = await this.findById(classId);
+        if(!classInfo)
+            return[];
+        const gradeStructure = classInfo.gradeStructure;
+        //console.log("GradeStructure OBJECT:",gradeStructure);
+        let identity_point = new Map();
+        let identity_grade = new Map();
+        let sample = [];
+        let i = 0;
+        for (const assign of gradeStructure) {
+            const element = {
+                name:assign.name,
+                identity:assign.identity,
+                point:null
+            }
+            identity_point.set(assign.identity, assign.point);//point la poin of grade structure
+            identity_grade.set(assign.identity, i);
+            sample.push(element);
+            i++;
+        }
+
+        
+        let newObj = {};
+        newObj.studentId=studentId
+        //-----------------map to account----------------------------
+        const rawInfoStudent = await classMemberService.findInfoStudentByStudentId(studentId,classId)
+        //console.log(rawInfoStudent);
+        if(rawInfoStudent)
+            newObj.account=rawInfoStudent.user;
+        else
+            newObj.account=null;
+        // newObj.account={
+        //     name:,
+        //     _id
+        // }
+        //-----------------done map to account-----------------------
+        let total = 0;
+        //let newGrades = [].concat(sample);
+        let newGrades = sample;
+        //console.log("AFTER CLONE:",newGrades)
+        
+        const gradesOfAStudent = await gradeService.findGradesOfAStudent(studentId,classId);
+        //console.log("Grdae of A Student in db:",gradesOfAStudent);
+        for (const g of gradesOfAStudent) {
+            newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
+            total+=identity_point.get(g.gradeIdentity)*g.point/10;
+        }
+        //console.log("Student OBJECT:",s);
+        //console.log("NEW OBJECT:",newGrades);
+        //console.log("TOTAL GRADE:",total);
+        newObj.grades = newGrades;
+        newObj.total=total;
+            
+            
+        
+        return newObj;
+
     }
 
 }
