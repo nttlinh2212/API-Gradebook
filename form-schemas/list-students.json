@@ -6,9 +6,13 @@
         "items":{
           "type":"object",
           "properties": {
-              "studentId": {"type": "string"},
+              "studentId": {
+                "type": "string",
+                "minLength": 1
+              },
               "fullName": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               }
           }
         }
