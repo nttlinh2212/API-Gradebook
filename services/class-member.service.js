@@ -54,7 +54,10 @@ const classMemberService = {
                 _id:1,
                 name:1,
             }
-        }).select("_id");
+        }).select({
+            "_id":1,
+            "studentId":1,
+        });
     },
     findAllTeachersInAClass(classId) {
         return classMemberModel.find({
