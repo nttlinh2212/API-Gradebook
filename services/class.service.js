@@ -123,7 +123,7 @@ const classService = {
             //console.log("NEW OBJECT:",newGrades);
             //console.log("TOTAL GRADE:",total);
             newObj.grades = newGrades;
-            newObj.total=total;
+            newObj.total=Math.round(total * 100) / 100;
             result.push(newObj)
             
         }
@@ -183,7 +183,7 @@ const classService = {
         //console.log("NEW OBJECT:",newGrades);
         //console.log("TOTAL GRADE:",total);
         newObj.grades = newGrades;
-        newObj.total=total;
+        newObj.total=Math.round(total * 100) / 100;
             
             
         

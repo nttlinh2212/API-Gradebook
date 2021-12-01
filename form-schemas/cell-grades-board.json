@@ -8,7 +8,7 @@
       "type": "string"
     },
     "point": {
-      "type": "number"
+      "type": ["number","null"]
     }
   },
   "required": [
