@@ -14,6 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^7.6.0",
+    "@sentry/cli": "^1.71.0",
+    "@sentry/node": "^6.16.1",
+    "@sentry/tracing": "^6.16.1",
     "ajv": "^8.6.3",
     "bcryptjs": "^2.4.3",
     "convert-excel-to-json": "^1.7.0",

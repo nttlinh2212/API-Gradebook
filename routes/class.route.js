@@ -107,9 +107,9 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
 // });
 
 router.get('/:id/studentid',authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
-  
+  const studentId = req.studentId();
   return res.status(200).json({
-    studentId: req.studentId
+    studentId
   });
 });
 router.patch('/:id/studentid',validate(studentidSchema),authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
