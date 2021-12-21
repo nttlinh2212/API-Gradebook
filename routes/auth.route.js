@@ -33,10 +33,11 @@ router.post('/', validate(schema), async function (req, res) {
   }
 
   const opts = {
-    expiresIn: 15 * 60 // seconds
+    expiresIn: 30 * 60 // seconds
   };
   const payload = {
-    userId: user.id
+    userId: user.id,
+    role: user.role,
   };
   const accessToken = jwt.sign(payload,SECRET_KEY, opts);
 
@@ -52,6 +53,7 @@ router.post('/', validate(schema), async function (req, res) {
     lastName:user.lastName,
     name:user.name,
     email:user.email,
+    role:user.role,
     accessToken,
     refreshToken
   });
@@ -63,14 +65,14 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
     const opts = {
       ignoreExpiration: true
     };
-    const { userId } = jwt.verify(accessToken, SECRET_KEY, opts);
+    const { userId,role } = jwt.verify(accessToken, SECRET_KEY, opts);
     //console.log("Sign successfully",userId);
     const ret = await userService.isValidRefreshToken(userId, refreshToken);
     if (ret) {
       const opts = {
-        expiresIn: 10 * 60 // seconds
+        expiresIn: 30 * 60 // seconds
       };
-      const payload = { userId };
+      const payload = { userId,role };
       const new_accessToken = jwt.sign(payload, SECRET_KEY, opts);
       return res.json({
         accessToken: new_accessToken
@@ -111,20 +113,23 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
   console.log("PayLoad",retPayload);
   const googleId = retPayload['sub'];
   const exist = await userService.findByEmail(retPayload['email']);
-  let userId, firstName, lastName,name, email;
+  let userId, firstName, lastName,name, email, role;
   if(!exist){
     const user = await userService.add({
       googleId,
       email:retPayload['email'],
       firstName:retPayload['given_name'],
       lastName:retPayload['family_name'],
-      name:retPayload['name']
+      name:retPayload['name'],
+      role:'member',
     })
     userId = user._id;
     firstName = user.firstName;
     lastName = user.lastName;
     name = user.name;
     email = user.email; 
+    role = user.role;
+    
   }
   else {
     if(exist&&!exist.googleId){
@@ -138,14 +143,17 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     lastName = exist.lastName;
     name = exist.name;
     email = exist.email; 
+    role = exist.role;
   }
   
   
   const opts = {
-    expiresIn: 15 * 60 // seconds
+    expiresIn: 30 * 60 // seconds
   };
   const payload = {
-    userId
+    userId,
+    role,
+
   };
   const accessToken = jwt.sign(payload,SECRET_KEY, opts);
 
@@ -162,7 +170,8 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     name,
     email,
     accessToken,
-    refreshToken
+    refreshToken,
+    role
   });
 });
 export default router;

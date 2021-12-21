@@ -82,8 +82,10 @@ const classMemberService = {
 
     patch(classMemberId, newObj) {
         return classMemberModel.updateOne({_id:classMemberId},newObj);
+    },
+    delete(classId) {
+        return classMemberModel.update({class: classId}, {$unset: {studentId: 1 }})
     }
-
 }
 export default classMemberService;
 

@@ -20,7 +20,13 @@ const userSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
     name:String,
-    rfToken: String,   
+    rfToken: String,
+    role:{
+        type:String,
+        enum:["member","admin"],
+        default:"member"
+    },
+    studentId:String,   
 },
 {
     timestamps:true,

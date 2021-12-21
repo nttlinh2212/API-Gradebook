@@ -13,7 +13,6 @@ import mongoose from 'mongoose';
 import gradeService from '../services/grade.service.js';
 
 const router = express.Router();
-const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
 const gradeStructureSchema = JSON.parse(await readFile(new URL('../form-schemas/grade-structure.json', import.meta.url)));
@@ -75,7 +74,7 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
   //check key
   let participating;
   try{
-    participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+    participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
       err: "Not found class!"
@@ -90,7 +89,7 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
       err: "Key is not right!"
     });
   const ret = await classMemberService.add({
-    user:req.accessTokenPayload.userId,
+    user:req.userId,
     class:id
   });
   console.log("Add member in a class:",ret)
@@ -106,29 +105,7 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
 //   });
 // });
 
-router.get('/:id/studentid',authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
-  
-  return res.status(200).json({
-    studentId: req.studentId
-  });
-});
-router.patch('/:id/studentid',validate(studentidSchema),authMdw.auth ,authMdw.authMember,authMdw.authStudent, async function (req, res) {
-  if(req.studentId){
-    return res.status(400).json({
-      message: "StudentID has only one change"
-    });
-  }
-  const exist = await classMemberService.findStudentIdInAClass(req.body.studentId,req.params.id);
-  if(exist){
-    return res.status(400).json({
-      message: "StudentID is not available"
-    });
-  }
-  const ret = await classMemberService.patch(req.partId,req.body)
-  res.status(201).json({
-    message:"update successfully"
-  });
-});
+
 
 
 
@@ -147,26 +124,43 @@ router.patch('/:id/studentid',validate(studentidSchema),authMdw.auth ,authMdw.au
 //     all
 //   });
 // });
-router.patch('/', async function (req, res) {
+// router.patch('/', async function (req, res) {
 
-  const all = await classService.findAll();
-  for (const c of all) {
-    const gradeStructure = [];
-    const n = await classService.patch(c._id, {gradeStructure});
-  }
+//   const all = await classService.findAll();
+//   for (const c of all) {
+//     const gradeStructure = [];
+//     const n = await classService.patch(c._id, {gradeStructure});
+//   }
   
-  res.json({
-    all
-  });
-});
-
+//   res.json({
+//     all
+//   });
+// });
+// router.patch('/', async function (req, res) {
+//   const all = await classService.findAll();
+//   for (const c of all) {
+//     const ret = await classMemberService.delete(c._id);
+//   }
+//   res.json({
+//     all
+//   });
+// });
+// router.patch('/', async function (req, res) {
+//   const all = await userService.findAll();
+//   for (const c of all) {
+//     const ret = await userService.patch(c._id,{role:'member'});
+//   }
+//   res.json({
+//     all
+//   });
+// });
 router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const id = req.params.id || 0;
   const email = req.body.email || 0;
   const role = req.body.role||"student";
   const fromEmail = process.env.EMAIL_FROM;
   const urlFE = process.env.URL_FE;
-  const user = await userService.findById(req.accessTokenPayload.userId);
+  const user = await userService.findById(req.userId);
 
   //check xem neu da la member
   const invitedUser = await userService.findByEmail(email);
@@ -231,11 +225,11 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
 router.get('/:id/confirm-invite-email',authMdw.auth , async function (req, res) {
   const id = req.params.id || 0;
   const token = req.query.token || 0;
-  const user = await userService.findById(req.accessTokenPayload.userId);
+  const user = await userService.findById(req.userId);
   //check key
   let participating;
   try{
-    participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+    participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
       err: "Not found class!"
@@ -264,11 +258,11 @@ router.get('/:id/confirm-invite-email',authMdw.auth , async function (req, res) 
 router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , async function (req, res) {
   const id = req.params.id || 0;
   const token = req.body.token || 0;
-  const user = await userService.findById(req.accessTokenPayload.userId);
+  const user = await userService.findById(req.userId);
   //check key
   let participating;
   try{
-    participating = await classMemberService.findAMemberInAClass(req.accessTokenPayload.userId,id);
+    participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
       err: "Not found class!"

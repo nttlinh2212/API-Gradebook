@@ -16,9 +16,9 @@ const classSchema = new mongoose.Schema({
         default:'student',
         enum:['student','teacher'],
     },
-    studentId:{
-        type:String,
-    }
+    // studentId:{
+    //     type:String,
+    // }
     
 },
 {

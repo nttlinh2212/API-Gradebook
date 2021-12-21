@@ -16,15 +16,15 @@ const userSchema = JSON.parse(await readFile(new URL('../form-schemas/user.json'
 
 
 
-router.get('/classes',authMdw.auth, async function (req, res) {
+router.get('/classes',authMdw.auth,authMdw.authMemberUser, async function (req, res) {
   console.log('ROOT ROUTER: ');
-  const list = await classMemberService.findAllClassesByUser(req.accessTokenPayload.userId);
+  const list = await classMemberService.findAllClassesByUser(req.userId);
   res.json(list);
 });
 
 router.post('/classes',authMdw.auth, validate(schema), async function (req, res) {
   console.log('ROOT ROUTER: ', req.body);
-  req.body.createdUser=req.accessTokenPayload.userId;
+  req.body.createdUser=req.userId;
   
   const key = randomstring.generate(8);
   req.body.key=key;

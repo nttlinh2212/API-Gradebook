@@ -5,7 +5,9 @@ const userService = {
     async findByEmail(email) {
         return userModel.findOne({email});
     },
-      
+    async findByStudentId(studentId) {
+        return userModel.findOne({studentId});
+    },  
     async isValidRefreshToken (userId, refreshToken) {
         return userModel.findOne({_id:userId, rfToken:refreshToken});
     },

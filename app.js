@@ -29,9 +29,6 @@ app.use('/auth/', authRouter);
 app.use('/user/', userRouter);
 app.use('/class/', classRouter);
 
-app.get('/err', function (req, res) {
-  throw new Error('Error!');
-});
 
 app.use(function (req, res, next) {
   res.status(404).json({
