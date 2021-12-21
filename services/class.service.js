@@ -2,6 +2,7 @@
 import classModel from '../models/class.model.js';
 import classMemberService from './class-member.service.js';
 import gradeService from './grade.service.js';
+import userService from './user.service.js';
 
 
 const classService = {
@@ -97,10 +98,13 @@ const classService = {
             let newObj = {};
             newObj.studentId=s.studentId
             //-----------------map to account----------------------------
-            const rawInfoStudent = await classMemberService.findInfoStudentByStudentId(s.studentId,classId)
+            const rawInfoStudent = await userService.findByStudentId(s.studentId)
             //console.log(rawInfoStudent);
             if(rawInfoStudent)
-                newObj.account=rawInfoStudent.user;
+                newObj.account={
+                    _id:rawInfoStudent._id,
+                    name:rawInfoStudent.name,
+                };
             else
                 newObj.account=null;
             // newObj.account={
