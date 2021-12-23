@@ -25,7 +25,11 @@ router.post('/', validate(schema), async function (req, res) {
       authenticated: false
     });
   }
-
+  if (user.status === "disable") {
+    return res.status(401).json({
+      message:"This account is disable. Please contact Admin to recover this account."
+    });
+  }
   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
     return res.status(401).json({
       authenticated: false
@@ -137,6 +141,11 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       console.log(await userService.patch(exist._id, {
         googleId
       }));
+    }
+    if (exist.status === "disable") {
+      return res.status(401).json({
+        message:"This account is disable. Please contact Admin to recover this account."
+      });
     }
     userId = exist._id;
     firstName = exist.firstName;

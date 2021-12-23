@@ -14,7 +14,16 @@ const userService = {
     findAll() {
         return userModel.find();
     },
-   
+    findAllHavingSelect() {
+        return userModel.find().select({
+            _id:1,
+            email:1,
+            firstName:1,
+            lastName:1,
+            studentId:1,
+            "status":1,
+        });;
+    },
     async findById(userId) {
         return userModel.findOne({_id:userId});
     },

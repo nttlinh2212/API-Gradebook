@@ -146,9 +146,9 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
 //   });
 // });
 // router.patch('/', async function (req, res) {
-//   const all = await userService.findAll();
+//   const all = await classService.findAll();
 //   for (const c of all) {
-//     const ret = await userService.patch(c._id,{role:'member'});
+//     const ret = await classService.patch(c._id,{status:'enable'});
 //   }
 //   res.json({
 //     all

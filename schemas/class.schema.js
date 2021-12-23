@@ -47,7 +47,12 @@ const classSchema = new mongoose.Schema({
     listStudents:{
         type: Array,
         of: studentSchema
-    }
+    },
+    status:{
+        type:String,
+        enum:["disable","enable"],
+        default:"enable"
+    }, 
 },
 {
     timestamps:true,

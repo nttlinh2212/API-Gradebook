@@ -26,7 +26,15 @@ const userSchema = new mongoose.Schema({
         enum:["member","admin"],
         default:"member"
     },
-    studentId:String,   
+    studentId:{
+        type:String,
+        default:null
+    },  
+    status:{
+        type:String,
+        enum:["disable","enable"],
+        default:"enable"
+    },   
 },
 {
     timestamps:true,
