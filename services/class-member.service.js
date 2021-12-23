@@ -9,6 +9,7 @@ const classMemberService = {
                 _id: 1,
                 name:1,
                 description:1,
+                status:1
             },
             populate:{
                 path:"createdUser",

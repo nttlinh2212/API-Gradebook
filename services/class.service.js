@@ -45,6 +45,9 @@ const classService = {
     async findById(classId) {
         return classModel.findOne({_id:classId});
     },
+    async findByCode(code) {
+        return classModel.findOne({key:code});
+    },
     async findByIdHavingSelect(classId,select) {
         return classModel.findOne({_id:classId}).select(select);
     },

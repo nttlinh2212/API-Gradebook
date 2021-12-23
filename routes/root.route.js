@@ -36,7 +36,29 @@ router.post('/classes',authMdw.auth, validate(schema), async function (req, res)
   }
   res.status(201).json(classObj);
 });
-
+router.post('/classes/join',authMdw.auth, async function (req, res) {
+  const code = req.query.code;
+  const success = await classService.findByCode(code)
+  if(!success){
+    return res.status(400).json({
+      err: "Not found Class"
+    });
+  }
+  const id = success._id;
+  //--------- if joined class
+  let participating = await classMemberService.findAMemberInAClass(req.userId,id);
+  if(participating)
+    return res.redirect(`/class/${id}`);
+  //-----------if not join class
+  const ret = await classMemberService.add({
+    user:req.userId, 
+    role:"student",
+    class:id
+  });
+  console.log("Result of Adding new member:",ret);
+  return res.redirect(`/class/${id}`);
+  
+});
 
 router.post('/register', validate(userSchema), async function (req, res) {
   let user = req.body;
