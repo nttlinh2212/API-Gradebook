@@ -1,5 +1,6 @@
 
 import classModel from '../models/class.model.js';
+import userModel from '../models/user.model.js';
 import classMemberService from './class-member.service.js';
 import gradeService from './grade.service.js';
 import userService from './user.service.js';
@@ -8,6 +9,31 @@ import userService from './user.service.js';
 const classService = {
     findAll() {
         return classModel.find();
+    },
+    async findAllHavingSelect() {
+        let ret = [];
+        const listClasses = await classModel.find().populate(
+            {
+                path:"createdUser",
+                select:{name:1,_id:1}
+            });
+        for (const c of listClasses) {
+            const students = await classMemberService.findAllStudentsInAClass(c._id);
+            const numOfStudents = students.length;
+            const teachers = await classMemberService.findAllTeachersInAClass(c._id);
+            const numOfTeachers = teachers.length;
+            const obj = {
+                _id:c._id,
+                "name":c.name,
+                "status":c.status,
+                createdUser: c.createdUser,
+                numOfStudents,
+                numOfTeachers,
+            }
+            ret.push(obj);
+        }
+        return ret;
+        
     },
     findOneGrade(classId,identity){
         return classModel.findOne({

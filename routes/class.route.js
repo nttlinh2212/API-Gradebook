@@ -26,7 +26,7 @@ const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
  
 
-router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
+router.get('/:id',authMdw.class, authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
   const classObj = await classService.findClassInfoById(id);
   if (classObj === null) {
@@ -34,7 +34,7 @@ router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
   }
   //console.log("Role:",req.role,classObj)
   if(req.role==="student"){
-    console.log("Student info claass");
+    //console.log("Student info claass");
     const retJson = {
       _id:classObj._id,
       name:classObj.name,
@@ -42,7 +42,7 @@ router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
       createdUser:classObj.createdUser,
       role:req.role
     }
-    console.log("Role:",req.role,retJson)
+    //console.log("Role:",req.role,retJson)
     return res.json(retJson);
   }
   const retJson = {
@@ -56,7 +56,7 @@ router.get('/:id',authMdw.auth ,authMdw.authMember, async function (req, res) {
   console.log("Role:",req.role,retJson)
   res.json(retJson);
 });
-router.get('/:id/list-member',authMdw.auth ,authMdw.authMember, async function (req, res) {
+router.get('/:id/list-member',authMdw.class, authMdw.auth ,authMdw.authMember, async function (req, res) {
   const id = req.params.id || 0;
   const listStudents = await classMemberService.findAllStudentsInAClass(id);
   const listTeachers = await classMemberService.findAllTeachersInAClass(id);
@@ -68,7 +68,7 @@ router.get('/:id/list-member',authMdw.auth ,authMdw.authMember, async function (
   res.json(retJson);
 });
 
-router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
+router.get('/:id/key/:key',authMdw.class, authMdw.auth, async function (req, res) {
   const id = req.params.id || 0;
   const key = req.params.key || 0;
   //check key
@@ -154,7 +154,7 @@ router.get('/:id/key/:key',authMdw.auth, async function (req, res) {
 //     all
 //   });
 // });
-router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const id = req.params.id || 0;
   const email = req.body.email || 0;
   const role = req.body.role||"student";
@@ -222,7 +222,7 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema),authMdw.auth ,
 
  
 });
-router.get('/:id/confirm-invite-email',authMdw.auth , async function (req, res) {
+router.get('/:id/confirm-invite-email',authMdw.class, authMdw.auth , async function (req, res) {
   const id = req.params.id || 0;
   const token = req.query.token || 0;
   const user = await userService.findById(req.userId);
@@ -255,7 +255,7 @@ router.get('/:id/confirm-invite-email',authMdw.auth , async function (req, res) 
   });
  
 });
-router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , async function (req, res) {
+router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.class, authMdw.auth , async function (req, res) {
   const id = req.params.id || 0;
   const token = req.body.token || 0;
   const user = await userService.findById(req.userId);
@@ -288,7 +288,7 @@ router.post('/:id/confirm-invite-email/',validate(tokenSchema),authMdw.auth , as
   return res.redirect(`/class/${id}`);
  
 });
-router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const classId = req.params.id || 0;
   const structure = req.body;
   console.log("Structure:",structure);
@@ -309,14 +309,14 @@ router.patch('/:id/grade-structure', validate(gradeStructureSchema),authMdw.auth
   console.log("RESULT OF GRADE STRUCTURE:",ret);
   res.status(201).json(structure);
 });
-router.get('/:id/grade-structure',authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.get('/:id/grade-structure',authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const classId = req.params.id || 0;
   const ret = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
   console.log("RESULT OF GRADE STRUCTURE:",ret);
   res.status(200).json(ret);
 });
 //------------------------add list students---------------------------------
-router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.post('/:id/list-students', validate(listStudentsSchema),authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   
   const classId = req.params.id || 0;
   const listStudents = req.body.listStudents;
@@ -368,7 +368,7 @@ router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,au
   
   
 });
-router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   
   const classId = req.params.id || 0;
   const grades = req.body.grades;
@@ -444,13 +444,13 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   //----------------done update grades for all submited students------
   res.status(201).json(ret);
 });
-router.get('/:id/grades-board',authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.get('/:id/grades-board',authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const id = req.params.id || 0;
   const ret = await classService.getGradesOfAllStudents(id);
   res.status(200).json(ret);
 });
 
-router.patch('/:id/cell-grades-board',validate(cellGradesBoardSchema),authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
+router.patch('/:id/cell-grades-board',validate(cellGradesBoardSchema),authMdw.class, authMdw.auth ,authMdw.authMember,authMdw.authTeacher, async function (req, res) {
   const {identity,point,studentId}=req.body;
   const classId = req.params.id || 0;
   //---------------------------check studentid in class--------------------------

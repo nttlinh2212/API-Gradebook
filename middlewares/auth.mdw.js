@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import classMemberService from '../services/class-member.service.js';
 import userService from '../services/user.service.js';
+import classService from '../services/class.service.js';
 
 
 dotenv.config();
@@ -93,6 +94,20 @@ export default{
         message: 'No permission'
       });
     
+    next();
+  },
+  async class(req, res, next) {
+    // const participating = req.participating;
+    const id = req.params.id;
+    let classObj = null;
+    console.log("id = ",id);
+    if(id)
+      classObj = await classService.findById(id);
+    console.log(classObj)
+    if(classObj&&classObj.status === 'disable')
+      return res.status(401).json({
+        message: 'This class is disable. Please contact Admin to recover this class.'
+      });
     next();
   }
 }

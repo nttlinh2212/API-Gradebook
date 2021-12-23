@@ -4,6 +4,7 @@ import { readFile } from 'fs/promises';
 
 import userService from '../services/user.service.js';
 import validate from '../middlewares/validate.mdw.js';
+import classService from '../services/class.service.js';
 
 
 const router = express.Router();
@@ -12,7 +13,7 @@ const router = express.Router();
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
 
 
-
+//------------------------USERS----------------------------------------------------
 router.get('/users', async function (req, res) {
   const user = await userService.findAllHavingSelect()
   res.status(200).json(user);
@@ -44,5 +45,20 @@ router.patch('/users/:id/studentid',validate(studentidSchema),async function (re
   res.status(201).json({
     message:"update successfully"
   });
+});
+//-----------------------------------------CLASS-------------------
+router.get('/classes', async function (req, res) {
+  const classObj = await classService.findAllHavingSelect();
+  res.status(200).json(classObj);
+});
+router.delete('/classes/:id', async function (req, res) {
+  const id = req.params.id;
+  const classObj = await classService.patch(id,{status:"disable"})
+  res.status(200).json(classObj);
+});
+router.post('/classes/:id', async function (req, res) {
+  const id = req.params.id;
+  const classObj = await classService.patch(id,{status:"enable"})
+  res.status(200).json(classObj);
 });
 export default router;

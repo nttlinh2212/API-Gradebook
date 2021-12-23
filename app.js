@@ -30,7 +30,7 @@ app.use('/',rootRouter);
 app.use('/auth/', authRouter);
 app.use('/user/', userRouter);
 app.use('/admin/',authMdw.auth, authMdw.authAdminUser,adminRouter);
-app.use('/class/', classRouter);
+app.use('/class/',classRouter);
 
 
 app.use(function (req, res, next) {
