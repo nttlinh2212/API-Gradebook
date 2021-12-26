@@ -474,7 +474,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   //----------------done update grades for all submited students------
   res.status(201).json(ret);
 });
-router.get('/:id/grades-board', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
+router.get('/:id/grades-board', authMdw.auth ,authMdw.authMember,authMdw.class, async function (req, res) {
   const id = req.params.id || 0;
   const ret = await classService.getGradesOfAllStudents(id);
   res.status(200).json(ret);
@@ -509,7 +509,32 @@ router.patch('/:id/cell-grades-board',validate(cellGradesBoardSchema), authMdw.a
   } 
  await gradeService.addIfNotExistElseUpdate(condition,newInfo);
  //------------------------------get info grades of student to return--------------
-  const ret = await classService.getGradesOfAtudents(classId,studentId)
+  const ret = await classService.getGradesOfAtudents(classId,studentId,false)
+  res.status(201).json(ret);
+});
+router.get('/:id/grades-board/:studenId', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
+  const studentId = req.params.studenId || 0
+  const classId = req.params.id || 0;
+  //---------------------------check studentid in class--------------------------
+  const exist1 = await classService.findStudentIdInListStudents(classId,studentId);
+  console.log("StudentId in this class", studentId, classId, exist1);
+  if(!exist1){
+    return res.status(400).json({
+      err: `Do not have ${studentId} in this class`,
+    });
+  }
+ //------------------------------get info grades of student to return--------------
+  const ret = await classService.getGradesOfAtudents(classId,studentId,false)
+  res.status(201).json(ret);
+});
+//-------------------------------STUDENT WITH GRADE BOARD_-----------------------
+router.get('/:id/student/grades-board', authMdw.auth ,authMdw.authMember,authMdw.authStudent,authMdw.class, async function (req, res) {
+  const studentId = req.studentId || 0
+  const classId = req.params.id || 0;
+ //------------------------------get info grades of student to return--------------
+  const ret = await classService.getGradesOfAtudents(classId,studentId,true);
+  delete ret.account;
+  delete ret.studentId;
   res.status(201).json(ret);
 });
 export default router;
