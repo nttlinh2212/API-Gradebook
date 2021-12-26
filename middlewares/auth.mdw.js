@@ -100,10 +100,10 @@ export default{
     // const participating = req.participating;
     const id = req.params.id;
     let classObj = null;
-    console.log("id = ",id);
+    //console.log("id = ",id);
     if(id)
       classObj = await classService.findById(id);
-    console.log(classObj)
+    //console.log(classObj)
     if(classObj&&classObj.status === 'disable')
       return res.status(401).json({
         message: 'This class is disable. Please contact Admin to recover this class.'

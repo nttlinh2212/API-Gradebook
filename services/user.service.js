@@ -14,14 +14,26 @@ const userService = {
     findAll() {
         return userModel.find();
     },
-    findAllHavingSelect() {
-        return userModel.find().select({
+    findAllHavingSelect(obj, flag) {
+        if(flag)
+            return userModel.find(obj).select({
+                _id:1,
+                email:1,
+                firstName:1,
+                lastName:1,
+                studentId:1,
+                role:1,
+                "status":1,
+                
+            });;
+        return userModel.find(obj).select({
             _id:1,
             email:1,
             firstName:1,
             lastName:1,
-            studentId:1,
+            role:1,
             "status":1,
+            
         });;
     },
     async findById(userId) {
