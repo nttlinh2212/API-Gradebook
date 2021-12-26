@@ -91,7 +91,9 @@ const classService = {
     removeById(classId) {
         return classModel.deleteOne({_id:classId})
     },
-
+    update(condition,updatedObj){
+        return classModel.update(condition,updatedObj);
+    },
     patch(classId, newObj) {
         return classModel.updateOne({_id:classId},newObj);
     },

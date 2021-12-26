@@ -148,7 +148,10 @@ router.get('/:id/key/:key', authMdw.auth,authMdw.class, async function (req, res
 // router.patch('/', async function (req, res) {
 //   const all = await classService.findAll();
 //   for (const c of all) {
-//     const ret = await classService.patch(c._id,{status:'enable'});
+//     for (const grade of c.gradeStructure) {
+//       console.log(grade);
+//     }
+    
 //   }
 //   res.json({
 //     all
@@ -309,11 +312,38 @@ router.patch('/:id/grade-structure', validate(gradeStructureSchema), authMdw.aut
   console.log("RESULT OF GRADE STRUCTURE:",ret);
   res.status(201).json(structure);
 });
+//-------------------------------GRADE STRUCTURE--------
 router.get('/:id/grade-structure', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
   const classId = req.params.id || 0;
   const ret = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
   console.log("RESULT OF GRADE STRUCTURE:",ret);
   res.status(200).json(ret);
+});
+router.delete('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
+  const classId = req.params.id || 0;
+  const compositionId = req.params.identity || 0;
+  const ret = await classService.update({
+    '_id':classId,
+    'gradeStructure.identity': compositionId
+  }, {'$set': {
+    'gradeStructure.$.finalized': false
+  }});
+  //console.log("RESULT OF DISABLE GRADE COMPOSITION:",ret);
+  res.redirect(`/class/${classId}/grade-structure`);
+});
+router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
+  const classId = req.params.id || 0;
+  const compositionId = req.params.identity || 0;
+  const ret = await classService.update({
+    '_id':classId,
+    'gradeStructure.identity': compositionId
+  }, 
+  {'$set': {
+    'gradeStructure.$.finalized': true
+    }
+  });
+  //console.log("RESULT OF DISABLE GRADE COMPOSITION:",ret);
+  res.redirect(`/class/${classId}/grade-structure`);
 });
 //------------------------add list students---------------------------------
 router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {

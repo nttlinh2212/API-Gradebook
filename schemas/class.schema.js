@@ -13,6 +13,10 @@ const assignmentSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    finalized: {
+        type:Boolean,
+        default:false,
+    },
 });
 const studentSchema = new mongoose.Schema({
     studentId: {
