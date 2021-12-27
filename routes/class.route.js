@@ -329,7 +329,9 @@ router.delete('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember
     'gradeStructure.$.finalized': false
   }});
   //console.log("RESULT OF DISABLE GRADE COMPOSITION:",ret);
-  res.redirect(`/class/${classId}/grade-structure`);
+  //return
+  const retJson = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
+  res.status(200).json(retJson);
 });
 router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
   const classId = req.params.id || 0;
@@ -342,8 +344,9 @@ router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,a
     'gradeStructure.$.finalized': true
     }
   });
-  //console.log("RESULT OF DISABLE GRADE COMPOSITION:",ret);
-  res.redirect(`/class/${classId}/grade-structure`);
+  const retJson = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
+  res.status(200).json(retJson);
+  
 });
 //------------------------add list students---------------------------------
 router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {

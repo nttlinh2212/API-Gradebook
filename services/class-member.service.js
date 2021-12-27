@@ -1,5 +1,6 @@
 
 import classMemberModel from '../models/class-member.model.js';
+import userService from './user.service.js';
 
 const classMemberService = {
     findAllClassesByUser(userId) {
@@ -22,18 +23,21 @@ const classMemberService = {
             _id:1
         })
     },
-    findStudentIdInAClass(studentId,classId){
+    // findStudentIdInAClass(studentId,classId){
+    //     return classMemberModel.findOne({
+    //         class:classId,
+    //         role:"student",
+    //         studentId
+    //     });
+    // },
+    async findInfoStudentByStudentId(studentId,classId){
+        const user = await userService.findByStudentId(studentId);
+        if(!user)
+            return null;
         return classMemberModel.findOne({
             class:classId,
             role:"student",
-            studentId
-        });
-    },
-    findInfoStudentByStudentId(studentId,classId){
-        return classMemberModel.findOne({
-            class:classId,
-            role:"student",
-            studentId
+            user:user._id
         }).populate({
             path:"user",
             select:{

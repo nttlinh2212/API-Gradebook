@@ -199,6 +199,7 @@ const classService = {
         newObj.studentId=studentId
         //-----------------map to account----------------------------
         const rawInfoStudent = await classMemberService.findInfoStudentByStudentId(studentId,classId)
+        //console.log("Raw info student:",rawInfoStudent, studentId, classId)
         //console.log(rawInfoStudent);
         if(rawInfoStudent)
             newObj.account=rawInfoStudent.user;
