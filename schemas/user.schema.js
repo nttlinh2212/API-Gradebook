@@ -34,7 +34,11 @@ const userSchema = new mongoose.Schema({
         type:String,
         enum:["disable","enable"],
         default:"enable"
-    },   
+    },
+    verified:{
+        type:Boolean,
+        default:false
+    }   
 },
 {
     timestamps:true,

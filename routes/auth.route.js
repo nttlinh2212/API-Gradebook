@@ -22,7 +22,7 @@ router.post('/', validate(schema), async function (req, res) {
   const user = await userService.findByEmail(req.body.email);
   if (user === null) {
     return res.status(401).json({
-      authenticated: false
+      message:"Invalid email or password"
     });
   }
   if (user.status === "disable") {
@@ -32,7 +32,7 @@ router.post('/', validate(schema), async function (req, res) {
   }
   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
     return res.status(401).json({
-      authenticated: false
+      message:"Invalid email or password"
     });
   }
 
@@ -183,4 +183,153 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     role
   });
 });
+
+//Verify email----------
+router.post('/send-verify-email/',validate(inviteEmailSchema),  async function (req, res) {
+  const id = req.params.id || 0;
+  const email = req.body.email || 0;
+  const role = req.body.role||"student";
+  const fromEmail = process.env.EMAIL_FROM;
+  const urlFE = process.env.URL_FE;
+  const user = await userService.findById(req.userId);
+
+  //check xem neu da la member
+  const invitedUser = await userService.findByEmail(email);
+  console.log("invited user:",invitedUser)
+  if(invitedUser){
+    let participating;
+    try{
+      participating = await classMemberService.findAMemberInAClass(invitedUser._id,id);
+    }catch(err){
+      return res.status(404).json({
+        err: "Not found class!"
+      });
+    }
+    if(participating){
+      return res.status(404).json({
+        err: `Can not invite since ${email} is a member of this class`
+      });
+    
+    }
+  }
+  
+  //create token
+  const opts = {
+    expiresIn: '2d' // seconds
+  };
+  const payload = {
+    email,
+    role,
+    classId:id,
+  };
+  const className = (await classService.findById(id)).name;
+  const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
+  //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
+  //send email
+///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
+  const acceptedLink = `${urlFE}class/join/${id}?token=${token}&role=${role}`;
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  const msg = {
+    to: email, // Change to your recipient
+    from: fromEmail, // Change to your verified sender
+    subject: `${user.name} has invited you to join ${className}`,
+    text: 'if you accept that, please click link below',
+    html: renderContentEmail(user.name,user.email,className,acceptedLink,role)
+  }
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent')
+      return res.status(200).json({
+        message: "Send email successfully"
+      });
+    })
+    .catch((error) => {
+      console.error(error)
+      return res.status(400).json({
+        message: "Send email fail"
+      });
+    })
+
+ 
+});
+router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async function (req, res) {
+  const id = req.params.id || 0;
+  const token = req.query.token || 0;
+  const user = await userService.findById(req.userId);
+  //check key
+  let participating;
+  try{
+    participating = await classMemberService.findAMemberInAClass(req.userId,id);
+  }catch(err){
+    return res.status(404).json({
+      err: "Not found class!"
+    });
+  }
+  
+  if(participating)
+    return res.redirect(`/class/${id}`);
+  const decoded = null;
+  try{
+    const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+    console.log("Payload:",decoded);
+  } catch (err) {
+    //console.log(err);
+    return res.status(401).json({
+      message: 'invalid link'
+    });
+  }
+  
+  const{email,role,classId}=decoded;
+  if(id!==classId||email!==user.email){
+    return res.status(401).json({
+      err: "invalid link"
+    });
+  }
+  const className = (await classService.findById(classId)).name;
+  return res.status(200).json({
+    email,
+    role,
+    classId,
+    className,
+  });
+ 
+});
+router.post('/:id/confirm-invite-email/',validate(tokenSchema), authMdw.auth ,authMdw.class, async function (req, res) {
+  const id = req.params.id || 0;
+  const token = req.body.token || 0;
+  const user = await userService.findById(req.userId);
+  //check key
+  let participating;
+  try{
+    participating = await classMemberService.findAMemberInAClass(req.userId,id);
+  }catch(err){
+    return res.status(404).json({
+      err: "Not found class!"
+    });
+  }
+  
+  if(participating)
+    return res.redirect(`/class/${id}`);
+  const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+  console.log("Payload:",decoded);
+  const{email,role,classId}=decoded;
+  if(id!==classId||email!==user.email){
+    return res.status(401).json({
+      err: "invalid link"
+    });
+  }
+  const ret = await classMemberService.add({
+    user:user._id, 
+    role,
+    class:classId
+  });
+  console.log("Result of Adding new member:",ret);
+  return res.redirect(`/class/${id}`);
+ 
+});
+
+
+
+
 export default router;

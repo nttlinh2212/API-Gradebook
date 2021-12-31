@@ -164,7 +164,7 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema), authMdw.auth 
   const fromEmail = process.env.EMAIL_FROM;
   const urlFE = process.env.URL_FE;
   const user = await userService.findById(req.userId);
-
+  console.log("Api key:",SENDGRID_API_KEY,"emailfrom:",fromEmail)
   //check xem neu da la member
   const invitedUser = await userService.findByEmail(email);
   console.log("invited user:",invitedUser)
@@ -241,8 +241,17 @@ router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async functi
   
   if(participating)
     return res.redirect(`/class/${id}`);
-  const decoded = jwt.verify(token, SECRET_KEY_INVITE);
-  console.log("Payload:",decoded);
+  const decoded = null;
+  try{
+    const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+    console.log("Payload:",decoded);
+  } catch (err) {
+    //console.log(err);
+    return res.status(401).json({
+      message: 'invalid link'
+    });
+  }
+  
   const{email,role,classId}=decoded;
   if(id!==classId||email!==user.email){
     return res.status(401).json({
