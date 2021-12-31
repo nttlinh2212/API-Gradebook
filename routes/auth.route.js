@@ -16,6 +16,7 @@ const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/login.json', import.meta.url)));
 const emailSchema = JSON.parse(await readFile(new URL('../form-schemas/email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
+const resetPassSchema = JSON.parse(await readFile(new URL('../form-schemas/reset-pw.json', import.meta.url)));
 const rfSchema = JSON.parse(await readFile(new URL('../form-schemas/rf.json', import.meta.url)));
 
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -124,7 +125,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
   }
   
   
-  console.log("PayLoad",retPayload);
+  //console.log("PayLoad",retPayload);
   const googleId = retPayload['sub'];
   const exist = await userService.findByEmail(retPayload['email']);
   let userId, firstName, lastName,name, email, role;
@@ -287,6 +288,89 @@ router.post('/verify-email/confirm', validate(tokenSchema), async function (req,
  
 });
 
+//----------------------------------------FORGOT PASSWORD------------------------------------------
+router.post('/reset-pw/send',validate(emailSchema),  async function (req, res) {
+  const email = req.body.email;
+  const fromEmail = process.env.EMAIL_FROM;
+  const urlFE = process.env.URL_FE;
+
+  //const user = await userService.findById(req.userId);
+
+  //check xem neu da verify
+  const user = await userService.findByEmail(email);
+  //console.log("invited user:",verifiedUser)
+  if(!user){
+    return res.status(404).json({
+      message: "Not found user"
+    });
+  }
+  //create token
+  const opts = {
+    expiresIn: 10 * 60 // seconds
+  };
+  const payload = {
+    email
+  };
+  const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
+  //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
+  //send email
+///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
+  const link = `${urlFE}forgot-password?email=${encodeURIComponent(email)}&token=${token}`;
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  const msg = {
+    to: email, // Change to your recipient
+    from: fromEmail, // Change to your verified sender
+    subject: `Reset password at Gradebook`,
+    html: renderContentEmail("Reset password","We have received a request to reset your password.\nPlease click the button below to reset password or If you did not make this request, please ignore this email."
+      ,"Reset your password","10 mins",link)
+  }
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent')
+      return res.status(200).json({
+        message: "Send email successfully"
+      });
+    })
+    .catch((error) => {
+      console.error(error)
+      return res.status(400).json({
+        message: "Send email fail"
+      });
+    })
+
+ 
+});
+router.post('/reset-pw/confirm', validate(resetPassSchema), async function (req, res) {
+  const token = req.body.token;
+  const newPass = req.body.newPass;
+  let decoded = null;
+  try{
+    decoded = jwt.verify(token, SECRET_KEY_INVITE);
+    //console.log("Payload:",decoded);
+  } catch (err) {
+    //console.log(err);
+    return res.status(400).json({
+      message: 'invalid link'
+    });
+  }
+  
+  const email = decoded.email;
+  const user = await userService.findByEmail(email);
+  if(!user){
+    return res.status(404).json({
+      message: "Not found user"
+    });
+  }
+
+  const password = bcrypt.hashSync(newPass, 10);
+  const ret = await userService.patch(user._id,{password});
+  //console.log("update password",ret,token,newPass);
+  res.status(201).json({
+    message:"Reset password successfully"
+  });
+ 
+});
 
 
 export default router;

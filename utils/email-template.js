@@ -362,7 +362,7 @@ export default function renderContentEmail(title,description,contentBtn,expiredT
                                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                       <tbody>
                                         <tr>
-                                          <td> <a href="${link}" target="_blank">${contentBtn}</a> </td>
+                                          <td> <a clicktracking="off" href="${link}" target="_blank">${contentBtn}</a> </td>
                                         </tr>
                                       </tbody>
                                     </table>
