@@ -4,19 +4,24 @@ import jwt from 'jsonwebtoken';
 import randomstring from 'randomstring';
 import dotenv from "dotenv";
 import { readFile } from 'fs/promises';
-
-
+import sgMail  from '@sendgrid/mail';
 import {OAuth2Client} from 'google-auth-library';
 import userService from '../services/user.service.js';
 import validate from '../middlewares/validate.mdw.js';
+import renderContentEmail from '../utils/email-template.js';
+
 
 dotenv.config();
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/login.json', import.meta.url)));
+const emailSchema = JSON.parse(await readFile(new URL('../form-schemas/email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
 const rfSchema = JSON.parse(await readFile(new URL('../form-schemas/rf.json', import.meta.url)));
-const  SECRET_KEY = process.env.SECRET_KEY;
+
+const SECRET_KEY = process.env.SECRET_KEY;
 const CLIENT_ID = process.env.CLIENT_ID;
+const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
 router.post('/', validate(schema), async function (req, res) {
   const user = await userService.findByEmail(req.body.email);
@@ -28,6 +33,11 @@ router.post('/', validate(schema), async function (req, res) {
   if (user.status === "disable") {
     return res.status(401).json({
       message:"This account is disable. Please contact Admin to recover this account."
+    });
+  }
+  if (!user.verified) {
+    return res.status(401).json({
+      message:"This email is not yet verified. Please verify this email to continue using the application."
     });
   }
   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
@@ -97,7 +107,7 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
 router.post('/google', validate(tokenSchema), async function (req, res) {
   
   const token = req.body.token;
-  console.log("TOKEN",token);
+  //console.log("TOKEN",token);
 
   const client = new OAuth2Client(CLIENT_ID);
   let retPayload;
@@ -126,6 +136,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       lastName:retPayload['family_name'],
       name:retPayload['name'],
       role:'member',
+      verified:true
     })
     userId = user._id;
     firstName = user.firstName;
@@ -133,7 +144,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     name = user.name;
     email = user.email; 
     role = user.role;
-    
+
   }
   else {
     if(exist&&!exist.googleId){
@@ -146,6 +157,9 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       return res.status(401).json({
         message:"This account is disable. Please contact Admin to recover this account."
       });
+    }
+    if (!exist.verified) {
+      await userService.patch(exist._id,{"verified":true});
     }
     userId = exist._id;
     firstName = exist.firstName;
@@ -184,151 +198,94 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
   });
 });
 
-// //Verify email----------
-// router.post('/send-verify-email/',validate(inviteEmailSchema),  async function (req, res) {
-//   const id = req.params.id || 0;
-//   const email = req.body.email || 0;
-//   const role = req.body.role||"student";
-//   const fromEmail = process.env.EMAIL_FROM;
-//   const urlFE = process.env.URL_FE;
-//   const user = await userService.findById(req.userId);
+//----------------------------------------VERIFY EMAIL------------------------------------------
+router.post('/verify-email/send',validate(emailSchema),  async function (req, res) {
+  const email = req.body.email;
+  const fromEmail = process.env.EMAIL_FROM;
+  const urlFE = process.env.URL_FE;
 
-//   //check xem neu da la member
-//   const invitedUser = await userService.findByEmail(email);
-//   console.log("invited user:",invitedUser)
-//   if(invitedUser){
-//     let participating;
-//     try{
-//       participating = await classMemberService.findAMemberInAClass(invitedUser._id,id);
-//     }catch(err){
-//       return res.status(404).json({
-//         err: "Not found class!"
-//       });
-//     }
-//     if(participating){
-//       return res.status(404).json({
-//         err: `Can not invite since ${email} is a member of this class`
-//       });
-    
-//     }
-//   }
-  
-//   //create token
-//   const opts = {
-//     expiresIn: '2d' // seconds
-//   };
-//   const payload = {
-//     email,
-//     role,
-//     classId:id,
-//   };
-//   const className = (await classService.findById(id)).name;
-//   const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
-//   //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
-//   //send email
-// ///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
-//   const acceptedLink = `${urlFE}class/join/${id}?token=${token}&role=${role}`;
-//   sgMail.setApiKey(SENDGRID_API_KEY);
-//   const msg = {
-//     to: email, // Change to your recipient
-//     from: fromEmail, // Change to your verified sender
-//     subject: `${user.name} has invited you to join ${className}`,
-//     text: 'if you accept that, please click link below',
-//     html: renderContentEmail(user.name,user.email,className,acceptedLink,role)
-//   }
-//   sgMail
-//     .send(msg)
-//     .then(() => {
-//       console.log('Email sent')
-//       return res.status(200).json({
-//         message: "Send email successfully"
-//       });
-//     })
-//     .catch((error) => {
-//       console.error(error)
-//       return res.status(400).json({
-//         message: "Send email fail"
-//       });
-//     })
+  //const user = await userService.findById(req.userId);
+
+  //check xem neu da verify
+  const verifiedUser = await userService.findByEmail(email);
+  //console.log("invited user:",verifiedUser)
+  if(!verifiedUser){
+    return res.status(404).json({
+      message: "Not found user"
+    });
+  }
+  if(verifiedUser.verified){
+    return res.status(400).json({
+      message: "This account is verified before"
+    });
+  }
+  //create token
+  const opts = {
+    expiresIn: 10 * 60 // seconds
+  };
+  const payload = {
+    email
+  };
+  const token = jwt.sign(payload,SECRET_KEY_INVITE, opts);
+  //console.log("DECODE:",(Buffer.from(token, 'base64').toString("utf8")))
+  //send email
+///class/join/6192342f1da8dc83c060b2a0?token=jllaGPGE&role=teacher
+  const link = `${urlFE}verify-email?token=${token}`;
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  const msg = {
+    to: email, // Change to your recipient
+    from: fromEmail, // Change to your verified sender
+    subject: `Let verify your email so you can start using the application`,
+    html: renderContentEmail("Verify email","Please click the button below to verify this email.","Verify email","10 mins",link)
+  }
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent')
+      return res.status(200).json({
+        message: "Send email successfully"
+      });
+    })
+    .catch((error) => {
+      console.error(error)
+      return res.status(400).json({
+        message: "Send email fail"
+      });
+    })
 
  
-// });
-// router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async function (req, res) {
-//   const id = req.params.id || 0;
-//   const token = req.query.token || 0;
-//   const user = await userService.findById(req.userId);
-//   //check key
-//   let participating;
-//   try{
-//     participating = await classMemberService.findAMemberInAClass(req.userId,id);
-//   }catch(err){
-//     return res.status(404).json({
-//       err: "Not found class!"
-//     });
-//   }
+});
+router.post('/verify-email/confirm', validate(tokenSchema), async function (req, res) {
+  const token = req.body.token;
+  let decoded = null;
+  try{
+    decoded = jwt.verify(token, SECRET_KEY_INVITE);
+    console.log("Payload:",decoded);
+  } catch (err) {
+    //console.log(err);
+    return res.status(400).json({
+      message: 'invalid link'
+    });
+  }
   
-//   if(participating)
-//     return res.redirect(`/class/${id}`);
-//   const decoded = null;
-//   try{
-//     const decoded = jwt.verify(token, SECRET_KEY_INVITE);
-//     console.log("Payload:",decoded);
-//   } catch (err) {
-//     //console.log(err);
-//     return res.status(401).json({
-//       message: 'invalid link'
-//     });
-//   }
-  
-//   const{email,role,classId}=decoded;
-//   if(id!==classId||email!==user.email){
-//     return res.status(401).json({
-//       err: "invalid link"
-//     });
-//   }
-//   const className = (await classService.findById(classId)).name;
-//   return res.status(200).json({
-//     email,
-//     role,
-//     classId,
-//     className,
-//   });
+  const email = decoded.email;
+  const user = await userService.findByEmail(email);
+  if(!user){
+    return res.status(404).json({
+      message: "Not found user"
+    });
+  }
+  if(user.verified){
+    return res.status(400).json({
+      message: "This account is verified before"
+    });
+  }
+  const ret = await userService.patch(user._id,{"verified":true});
+  return res.status(200).json({
+    message: "Verified successfully"
+  });
  
-// });
-// router.post('/:id/confirm-invite-email/',validate(tokenSchema), authMdw.auth ,authMdw.class, async function (req, res) {
-//   const id = req.params.id || 0;
-//   const token = req.body.token || 0;
-//   const user = await userService.findById(req.userId);
-//   //check key
-//   let participating;
-//   try{
-//     participating = await classMemberService.findAMemberInAClass(req.userId,id);
-//   }catch(err){
-//     return res.status(404).json({
-//       err: "Not found class!"
-//     });
-//   }
-  
-//   if(participating)
-//     return res.redirect(`/class/${id}`);
-//   const decoded = jwt.verify(token, SECRET_KEY_INVITE);
-//   console.log("Payload:",decoded);
-//   const{email,role,classId}=decoded;
-//   if(id!==classId||email!==user.email){
-//     return res.status(401).json({
-//       err: "invalid link"
-//     });
-//   }
-//   const ret = await classMemberService.add({
-//     user:user._id, 
-//     role,
-//     class:classId
-//   });
-//   console.log("Result of Adding new member:",ret);
-//   return res.redirect(`/class/${id}`);
- 
-// });
-
+});
 
 
 

@@ -1,13 +1,13 @@
 {
     "type": "object",
     "properties": {
-      "studentId": {
+      "email": {
         "type": "string",
-        "minLength": 1
+        "minLength": 2
       }
     },
     "required": [
-      "studentId"
+      "email"
     ],
     "additionalProperties": false
   }

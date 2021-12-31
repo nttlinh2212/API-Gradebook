@@ -1,12 +1,12 @@
 
-export default function renderContentEmail(title,description,contentBtn,expiredTime,link) {
+export default function renderContentEmail(nameInvitor,emailInvitor,className,link,role) {
     return  `
     <!doctype html>
     <html>
       <head>
         <meta name="viewport" content="width=device-width" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>${title}</title>
+        <title>Invite member</title>
         <style>
           /* -------------------------------------
               GLOBAL RESETS
@@ -353,8 +353,8 @@ export default function renderContentEmail(title,description,contentBtn,expiredT
                         <tr>
                           <td>
                             <p>Hi There,</p>
-                
-                            <p>${description}</p>
+                            <p>${nameInvitor} (${emailInvitor}) has invited you to join in ${className} as a role ${role}.</p>
+                            <p>Please click the button below to accept this invitation.</p>
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                               <tbody>
                                 <tr>
@@ -362,7 +362,7 @@ export default function renderContentEmail(title,description,contentBtn,expiredT
                                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                       <tbody>
                                         <tr>
-                                          <td> <a href="${link}" target="_blank">${contentBtn}</a> </td>
+                                          <td> <a href="${link}" target="_blank">View invitation</a> </td>
                                         </tr>
                                       </tbody>
                                     </table>
@@ -370,7 +370,7 @@ export default function renderContentEmail(title,description,contentBtn,expiredT
                                 </tr>
                               </tbody>
                             </table>
-                            <p>This invitation will expire in ${expiredTime}. </p>
+                            <p>This invitation will expire in 2 days. </p>
                           </td>
                         </tr>
                       </table>

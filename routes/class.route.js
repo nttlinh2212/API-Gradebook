@@ -8,7 +8,7 @@ import authMdw from '../middlewares/auth.mdw.js';
 import dotenv from 'dotenv';
 import userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
-import renderContentEmail from '../utils/email-template.js';
+import renderContentEmail from '../utils/email-invite-template.js';
 import mongoose from 'mongoose';
 import gradeService from '../services/grade.service.js';
 
@@ -164,10 +164,10 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema), authMdw.auth 
   const fromEmail = process.env.EMAIL_FROM;
   const urlFE = process.env.URL_FE;
   const user = await userService.findById(req.userId);
-  console.log("Api key:",SENDGRID_API_KEY,"emailfrom:",fromEmail)
+  //console.log("Api key:",SENDGRID_API_KEY,"emailfrom:",fromEmail)
   //check xem neu da la member
   const invitedUser = await userService.findByEmail(email);
-  console.log("invited user:",invitedUser)
+  //console.log("invited user:",invitedUser)
   if(invitedUser){
     let participating;
     try{
@@ -241,9 +241,9 @@ router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async functi
   
   if(participating)
     return res.redirect(`/class/${id}`);
-  const decoded = null;
+  let decoded = null;
   try{
-    const decoded = jwt.verify(token, SECRET_KEY_INVITE);
+    decoded = jwt.verify(token, SECRET_KEY_INVITE);
     console.log("Payload:",decoded);
   } catch (err) {
     //console.log(err);
