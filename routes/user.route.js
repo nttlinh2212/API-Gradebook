@@ -46,18 +46,18 @@ router.patch('/studentid',validate(studentidSchema),authMdw.auth,authMdw.authMem
   req.studentId = infoUser.studentId||null;
   if(req.studentId){
     return res.status(400).json({
-      message: "StudentID has only one change"
+      message: "StudentID has only one change."
     });
   }
   const exist = await userService.findByStudentId(req.body.studentId);
   if(exist){
     return res.status(400).json({
-      message: "StudentID is not available"
+      message: "StudentID is not available."
     });
   }
   const ret = await userService.patch(req.userId,req.body)
-  res.status(201).json({
-    message:"update successfully"
+  res.status(200).json({
+    message:"Update successfully."
   });
 });
 router.patch('/password',validate(passSchema),authMdw.auth, async function (req, res) {
@@ -68,15 +68,15 @@ router.patch('/password',validate(passSchema),authMdw.auth, async function (req,
   //   });
   // }
   if (bcrypt.compareSync(req.body.curPass, user.password) === false) {
-    return res.status(401).json({
+    return res.status(400).json({
       message:"Current password is wrong!"
     });
   }
     
   const password = bcrypt.hashSync(req.body.newPass, 10);
   const ret = await userService.patch(req.userId,{password});
-  console.log("update password",ret);
-  res.status(201).json({
+  //console.log("update password",ret);
+  res.status(200).json({
     message:"change password successfully"
   });
 });

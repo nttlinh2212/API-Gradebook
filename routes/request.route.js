@@ -27,7 +27,7 @@ router.get('/',authMdw.auth, async function (req, res) {
     try{
       ret = await requestService.findRequestsOfATeacher(req.userId);
     }catch(err){
-      return res.status(400).json({
+      return res.status(404).json({
         message: "You do not receive any request!"
       })
     }
@@ -42,12 +42,12 @@ router.post('/',validate(requestSchema),authMdw.auth, async function (req, res) 
     const isComposition = await classService.findOneGradeFinalize(req.body.class,req.body.gradeIdentity);
     if(!isJoin||!isComposition){
       return res.status(400).json({
-        message: "Invalid classId or gradeIdentity"
+        message: "Invalid classId or gradeIdentity."
       })
     }
   }catch(err){
     return res.status(400).json({
-      message: "Invalid classId or gradeIdentity"
+      message: "Invalid classId or gradeIdentity."
     })
   }
   
@@ -87,7 +87,7 @@ router.get('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
   ret.role = req.roleReq;
   res.status(200).json(ret);
 });
-router.delete('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
+router.delete('/:id',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
   if(req.request.status === "close"){
     return res.status(400).json({
@@ -117,7 +117,7 @@ router.delete('/:id',authMdw.auth, authMdw.authRequest, async function (req, res
   await notiService.addNewDecision(req.request.student,teacherName,id,req.userId);
   
   res.status(200).json({
-    message:"Close request successfully"
+    message:"Close request successfully!"
   });
 });
 router.get('/:id/comments',authMdw.auth, authMdw.authRequest, async function (req, res) {

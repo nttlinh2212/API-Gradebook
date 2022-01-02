@@ -88,6 +88,29 @@ const classService = {
             //     __v:0
             // });
     },
+    async findDetailClassInfoByIdWithRole(classId,role) {
+        const classObj = await this.findClassInfoById(classId);
+        if(!classObj)
+            return null;
+        if(role==="student"){
+            return retJson = {
+              _id:classObj._id,
+              name:classObj.name,
+              description:classObj.description,
+              createdUser:classObj.createdUser,
+              role
+            }
+            
+        }
+        return retJson = {
+            _id:classObj._id,
+            name:classObj.name,
+            description:classObj.description,
+            createdUser:classObj.createdUser,
+            role,
+            key:classObj.key,
+        }
+    },
     async add(classObj) {
         const classDoc =  new classModel(classObj);
         
