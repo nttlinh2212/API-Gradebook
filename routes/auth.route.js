@@ -89,7 +89,7 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
       };
       const payload = { userId,role };
       const new_accessToken = jwt.sign(payload, SECRET_KEY, opts);
-      return res.json({
+      return res.status(200).json({
         accessToken: new_accessToken
       });
     }
