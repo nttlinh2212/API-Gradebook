@@ -7,6 +7,7 @@ import auth from './middlewares/auth.mdw.js';
 
 import classRouter from './routes/class.route.js';
 import rootRouter from './routes/root.route.js';
+import reqRouter from './routes/request.route.js';
 import userRouter from './routes/user.route.js';
 import adminRouter from './routes/admin.route.js';
 import authRouter from './routes/auth.route.js';
@@ -31,7 +32,7 @@ app.use('/auth/', authRouter);
 app.use('/user/', userRouter);
 app.use('/admin/',authMdw.auth, authMdw.authAdminUser,adminRouter);
 app.use('/class/',classRouter);
-
+app.use('/request/',reqRouter);
 
 app.use(function (req, res, next) {
   res.status(404).json({

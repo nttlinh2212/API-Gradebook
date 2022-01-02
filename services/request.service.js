@@ -1,5 +1,6 @@
 
 
+import moment from 'moment';
 import requestModel from '../models/request.model.js';
 import classMemberService from './class-member.service.js';
 import classService from './class.service.js';
@@ -32,14 +33,29 @@ const requestService = {
             "status":1,
             "createdAt":1
         });
+        let ret = [];
         for (let i = 0;i< list.length;i++) {
-            const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
-            req.gradeComposition = gradeComp;
-            req.createdAt = moment(list[i].createdAt)
+            const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+            let element = {
+                _id:list[i]._id,
+                class:list[i].class,
+                curGrade:list[i].curGrade,
+                expectedGrade:list[i].expectedGrade,
+                explanation:list[i].explanation,
+                status:list[i].status,
+                finalGrade:list[i].finalGrade||null,
+                createdAt : moment(list[i].createdAt)
                 .zone("+07:00")
-                .format('YYYY-MM-DD HH:mm:ss');
+                .format('YYYY-MM-DD HH:mm:ss')
+            }
+            element.gradeComposition = {
+                identity: gradeComp.gradeStructure[0].identity,
+                name: gradeComp.gradeStructure[0].name,
+            };
+            ret.push(element)
+            
         }
-        return list;
+        return ret;
     },
     async findRequestsOfATeacher(userId) {
         //find all classes user joining as role teacher
@@ -48,6 +64,7 @@ const requestService = {
         for (const c of raw) {
             classes.push({class:c.class});
         }
+        //console.log("Classes",classes)
         let list =  await requestModel.find({ 
             $or:classes
         }).sort({ createdAt: -1 })
@@ -57,8 +74,8 @@ const requestService = {
                 _id: 1,
                 name:1
             }
-        },
-        {
+        })
+        .populate({
             path:"student",
             select:{
                 _id: 1,
@@ -75,21 +92,40 @@ const requestService = {
             "status":1,
             "createdAt":1
         });
+        let ret = [];
         for (let i = 0;i< list.length;i++) {
-            const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
-            req.gradeComposition = gradeComp;
-            req.createdAt = moment(list[i].createdAt)
+            const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+            let element = {
+                _id:list[i]._id,
+                class:list[i].class,
+                student:list[i].student,
+                curGrade:list[i].curGrade,
+                expectedGrade:list[i].expectedGrade,
+                explanation:list[i].explanation,
+                status:list[i].status,
+                finalGrade:list[i].finalGrade||null,
+                createdAt : moment(list[i].createdAt)
                 .zone("+07:00")
-                .format('YYYY-MM-DD HH:mm:ss');
+                .format('YYYY-MM-DD HH:mm:ss')
+            }
+            element.gradeComposition = {
+                identity: gradeComp.gradeStructure[0].identity,
+                name: gradeComp.gradeStructure[0].name,
+            };
+            ret.push(element)
+            
         }
-        return list;
+        return ret;
     },
     async findById(requestId) {
         return requestModel.findOne({_id:requestId});
     },
+    async findBy(obj) {
+        return requestModel.findOne(obj);
+    },
     async findDetailById(requestId) {
        
-        let ret =  await requestModel.findOne({ 
+        let raw =  await requestModel.findOne({ 
             _id:requestId
         })
         .populate({
@@ -116,12 +152,24 @@ const requestService = {
             "status":1,
             "createdAt":1
         });
-        const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
-        ret.gradeComposition = gradeComp;
-        ret.createdAt = moment(let.createdAt)
+        const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+        let ret = {
+            _id:raw._id,
+            class:raw.class,
+            student:raw.student,
+            curGrade:raw.curGrade,
+            expectedGrade:raw.expectedGrade,
+            explanation:raw.explanation,
+            status:raw.status,
+            finalGrade:raw.finalGrade||null,
+            createdAt : moment(raw.createdAt)
             .zone("+07:00")
-            .format('YYYY-MM-DD HH:mm:ss');
-        
+            .format('YYYY-MM-DD HH:mm:ss')
+        }
+        ret.gradeComposition = {
+            identity: gradeComp.gradeStructure[0].identity,
+            name: gradeComp.gradeStructure[0].name,
+        };
         return ret;
     },
     async findCommentsOfAReq(requestId) {
@@ -134,7 +182,7 @@ const requestService = {
     },
     async add(reqObj) {
         const studentId = (await userService.findById(reqObj.student)).studentId;
-        const curGrade = await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity)
+        const curGrade = (await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity)).point;
         reqObj.curGrade = curGrade;
         const reqDoc =  new requestModel(reqObj);
         const ret = await reqDoc.save();

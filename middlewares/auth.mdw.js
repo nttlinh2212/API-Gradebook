@@ -123,19 +123,26 @@ export default{
     if(request){
       if(request.student === req.userId){
         req.roleReq = "student";
-        return next();
+        
       }
-      const check = await classMemberService.findATeacherInAClass(req.userId,request.class);
-      if(check){
-        req.roleReq = "teacher";
-        return next();
-      }
-      return res.status(401).json({
-        message: 'You do not have permision to access this request'
-      });
+      else{
+        const check = await classMemberService.findARoleInAClass(req.userId,request.class,"teacher");
+        if(check){
+          req.roleReq = "teacher";
+          
+        }
+        else{
+          return res.status(401).json({
+            message: 'You do not have permision to access this request'
+          });
+        }
+        
+        }
+      
     }else
       return res.status(404).json({
         message: 'No found request'
       });
+    next();
   },
 }

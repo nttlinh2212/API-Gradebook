@@ -42,6 +42,20 @@ const classService = {
         
         });
     },
+    findOneGradeFinalize(classId,identity){
+        return classModel.findOne({
+            _id:classId,
+            'gradeStructure.identity': identity,
+            'gradeStructure.finalized': true,
+        },{"gradeStructure.$":1})    
+    },
+    // findDetailOneGrade(classId,identity){
+    //     return classModel.findOne({
+    //         _id:classId,
+    //         'gradeStructure.identity': identity
+    //     },{"gradeStructure.$":1})
+             
+    // },
     async findById(classId) {
         return classModel.findOne({_id:classId});
     },
