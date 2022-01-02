@@ -27,9 +27,8 @@ const requestSchema = new mongoose.Schema({
         ref:"class",
         required:true,
     },
-    gradeComposition:{
+    gradeIdentity:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"grade",
         required:true,
     },
     curGrade:{
@@ -56,7 +55,8 @@ const requestSchema = new mongoose.Schema({
     }, 
     comments:{
         type: Array,
-        of: commentSchema
+        of: commentSchema,
+        default:[]
     },
 },
 {

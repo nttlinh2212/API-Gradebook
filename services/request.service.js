@@ -1,5 +1,10 @@
 
+
 import requestModel from '../models/request.model.js';
+import classMemberService from './class-member.service.js';
+import classService from './class.service.js';
+import gradeService from './grade.service.js';
+import userService from './user.service.js';
 
 
 
@@ -7,35 +12,104 @@ const requestService = {
     findAll() {
         return requestModel.find();
     },
-    findRequestsOfAStudent(userId) {
-        return requestModel.find({
+    async findRequestsOfAStudent(userId) {
+        let list =  await requestModel.find({
             user:userId
-        }).populate({
+        }).sort({ createdAt: -1 })
+        .populate({
             path:"class",
             select:{
                 _id: 1,
                 name:1
-            },
-            populate:{
-                path:"gradeComposition",
-                select:{
-                    _id:1,
-                    name:1,
-                }
             }
         }).select({
-            _id:1
-        })
+            _id:1,
+            gradeIdentity:1,
+            curGrade:1,
+            expectedGrade:1,
+            explanation:1,
+            finalGrade:1,
+            "status":1,
+            "createdAt":1
+        });
+        for (let i = 0;i< list.length;i++) {
+            const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
+            req.gradeComposition = gradeComp;
+            req.createdAt = moment(list[i].createdAt)
+                .zone("+07:00")
+                .format('YYYY-MM-DD HH:mm:ss');
+        }
+        return list;
+    },
+    async findRequestsOfATeacher(userId) {
+        //find all classes user joining as role teacher
+        const raw = await classMemberService.findAllClasses(userId,"teacher");
+        let classes = [];
+        for (const c of raw) {
+            classes.push({class:c.class});
+        }
+        let list =  await requestModel.find({ 
+            $or:classes
+        }).sort({ createdAt: -1 })
+        .populate({
+            path:"class",
+            select:{
+                _id: 1,
+                name:1
+            }
+        },
+        {
+            path:"student",
+            select:{
+                _id: 1,
+                name:1,
+                studentId:1
+            }
+        }).select({
+            _id:1,
+            gradeIdentity:1,
+            curGrade:1,
+            expectedGrade:1,
+            explanation:1,
+            finalGrade:1,
+            "status":1,
+            "createdAt":1
+        });
+        for (let i = 0;i< list.length;i++) {
+            const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
+            req.gradeComposition = gradeComp;
+            req.createdAt = moment(list[i].createdAt)
+                .zone("+07:00")
+                .format('YYYY-MM-DD HH:mm:ss');
+        }
+        return list;
     },
     async findById(requestId) {
         return requestModel.findOne({_id:requestId});
+    },
+    async findCommentsOfAReq(requestId) {
+        return requestModel.findOne({_id:requestId}).select({
+            comments:1
+        }.sort({ "comments.createdAt": 1 }));
     },
     async findByIdHavingSelect(requestId,select) {
         return requestModel.findOne({_id:requestId}).select(select);
     },
     async add(reqObj) {
+        const studentId = (await userService.findById(reqObj.student)).studentId;
+        const curGrade = await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity)
+        reqObj.curGrade = curGrade;
         const reqDoc =  new requestModel(reqObj);
         const ret = await reqDoc.save();
+        return ret;
+    },
+    async addNewComment(requestId,commentObj) {
+       let ret;
+        await requestModel.update(
+            { _id: requestId }, 
+            { $push: { comments: commentObj } },
+            ret
+        );
         return ret;
     },
 

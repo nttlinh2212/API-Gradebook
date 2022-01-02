@@ -23,6 +23,12 @@ const classMemberService = {
             _id:1
         })
     },
+    findAllClasses(userId,role) {
+        return classMemberModel.find({
+            user:userId,
+            role
+        }).select("class");
+    },
     // findStudentIdInAClass(studentId,classId){
     //     return classMemberModel.findOne({
     //         class:classId,
