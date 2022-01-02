@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import classMemberService from '../services/class-member.service.js';
 import userService from '../services/user.service.js';
 import classService from '../services/class.service.js';
+import requestService from '../services/request.service.js';
 
 
 dotenv.config();
@@ -109,5 +110,32 @@ export default{
         message: 'This class is disable. Please contact Admin to recover this class.'
       });
     next();
-  }
+  },
+  async authRequest(req,res,next){
+    const id = req.params.id;
+    if(!id){
+      return res.status(404).json({
+        message: 'Not found request'
+      });
+    }
+    let request = await requestService.findById(id);
+
+    if(request){
+      if(request.student === req.userId){
+        req.roleReq = "student";
+        return next();
+      }
+      const check = await classMemberService.findATeacherInAClass(req.userId,request.class);
+      if(check){
+        req.roleReq = "teacher";
+        return next();
+      }
+      return res.status(401).json({
+        message: 'You do not have permision to access this request'
+      });
+    }else
+      return res.status(404).json({
+        message: 'No found request'
+      });
+  },
 }

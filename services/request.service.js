@@ -87,6 +87,43 @@ const requestService = {
     async findById(requestId) {
         return requestModel.findOne({_id:requestId});
     },
+    async findDetailById(requestId) {
+       
+        let ret =  await requestModel.findOne({ 
+            _id:requestId
+        })
+        .populate({
+            path:"class",
+            select:{
+                _id: 1,
+                name:1
+            }
+        },
+        {
+            path:"student",
+            select:{
+                _id: 1,
+                name:1,
+                studentId:1
+            }
+        }).select({
+            _id:1,
+            gradeIdentity:1,
+            curGrade:1,
+            expectedGrade:1,
+            explanation:1,
+            finalGrade:1,
+            "status":1,
+            "createdAt":1
+        });
+        const gradeComp = await classService.findOneGrade(list[i].class._id,list[i].gradeIdentity);
+        ret.gradeComposition = gradeComp;
+        ret.createdAt = moment(let.createdAt)
+            .zone("+07:00")
+            .format('YYYY-MM-DD HH:mm:ss');
+        
+        return ret;
+    },
     async findCommentsOfAReq(requestId) {
         return requestModel.findOne({_id:requestId}).select({
             comments:1

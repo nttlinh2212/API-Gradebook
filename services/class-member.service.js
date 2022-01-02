@@ -55,6 +55,9 @@ const classMemberService = {
     async findAMemberInAClass(memberId, classId) {
         return classMemberModel.findOne({user:memberId,class:classId});
     },
+    async findATeacherInAClass(memberId, classId) {
+        return classMemberModel.findOne({user:memberId,class:classId,role:"teacher"});
+    },
     async findAllStudentsInAClass(classId) {
         return classMemberModel.find({
             class:classId, 

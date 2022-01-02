@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "requestId": {
+      "type": "string"
+    },
+    "finalGrade": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum":10
+    }
+  },
+  "required": [
+    "requestId","finalGrade"
+  ],
+  "additionalProperties": false
+}
