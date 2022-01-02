@@ -1,11 +1,14 @@
 import express from 'express';
 
+import moment from 'moment';
 import { readFile } from 'fs/promises';
 import validate from '../middlewares/validate.mdw.js';
 import authMdw from '../middlewares/auth.mdw.js';
 import requestService from '../services/request.service.js';
 import classMemberService from '../services/class-member.service.js';
 import classService from '../services/class.service.js';
+import gradeService from '../services/grade.service.js';
+import userService from '../services/user.service.js';
 
 const router = express.Router();
 
@@ -20,7 +23,13 @@ router.get('/',authMdw.auth, async function (req, res) {
     ret = await requestService.findRequestsOfAStudent(req.userId);
   }
   if(role === "teacher"){
-    ret = await requestService.findRequestsOfATeacher(req.userId);
+    try{
+      ret = await requestService.findRequestsOfATeacher(req.userId);
+    }catch(err){
+      return res.status(400).json({
+        message: "You do not receive any request!"
+      })
+    }
   }
   res.status(200).json(ret);
 });
@@ -51,7 +60,7 @@ router.post('/',validate(requestSchema),authMdw.auth, async function (req, res) 
   })
   if(exist){
     return res.status(400).json({
-      message: "You only have one time to request a review for a grade compostion."
+      message: "You only have one chance to request a review for a grade compostion."
     })
   }
   req.body.student = req.userId;
@@ -61,12 +70,54 @@ router.post('/',validate(requestSchema),authMdw.auth, async function (req, res) 
 router.get('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
   const ret = await requestService.findDetailById(id);
+  ret.role = req.roleReq;
   res.status(200).json(ret);
+});
+router.delete('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
+  const id = req.params.id;
+  const finalGrade = req.body.finalGrade;
+  if(req.roleReq!=="teacher")
+    return res.status(403).json({
+      message: "You do not have permission to this action"
+    })
+  const studentId = (await userService.findById(req.request.student)).studentId;
+  const update1 = await gradeService.patchGeneral({
+    studentId,
+    class:req.request.class,
+    gradeIdentity:req.request.gradeIdentity
+  },{
+    point:finalGrade
+  })
+  gradeService.patch()
+  const update2 = await requestService.patch(id,{
+    finalGrade,
+    status:"close"
+  });
+  res.status(200).json({
+    message:"Close request successfully"
+  });
 });
 router.get('/:id/comments',authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
-  const comments = await requestService.findCommentsOfAReq(id);
-  res.status(200).json(comments);
+  const raw = await requestService.findCommentsOfAReq(id);
+  //console.log(raw);
+  const comments = raw.comments;
+  let ret = [];
+  for (let i = 0;i< comments.length;i++) {
+    
+    const c = comments[i];
+    //console.log(c);
+    const element = {
+      _id:c._id,
+      user:c.user,
+      content:c.content,
+      createdAt:moment(c.createdAt)
+      .zone("+07:00")
+      .format('YYYY-MM-DD HH:mm:ss')
+    }
+    ret.push(element);
+  }
+  res.status(200).json(ret);
 });
 router.post('/:id/comments',validate(commentSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
@@ -74,21 +125,21 @@ router.post('/:id/comments',validate(commentSchema),authMdw.auth, authMdw.authRe
     user: req.userId,
     content: req.body.content
   }
-  const ret = await requestService.addNewComment(obj);
+  const ret = await requestService.addNewComment(id,obj);
   res.status(201).json(ret);
 });
-router.post('/:id/final',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
-  if(req.roleReq === "student"){
-    return res.status(403).json({
-      message: "Forbidden"
-    })
-  }
-  const id = req.params.id;
-  let obj = {
-    finalGrade: req.body.finalGrade,
-    status: "close"
-  }
-  const ret = await requestService.patch(id,obj);
-  res.status(201).json(ret);
-});
+// router.post('/:id/final',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
+//   if(req.roleReq === "student"){
+//     return res.status(403).json({
+//       message: "You don not have permission to this action"
+//     })
+//   }
+//   const id = req.params.id;
+//   let obj = {
+//     finalGrade: req.body.finalGrade,
+//     status: "close"
+//   }
+//   const ret = await requestService.patch(id,obj);
+//   res.status(201).json(ret);
+// });
 export default router;

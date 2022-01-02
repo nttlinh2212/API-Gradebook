@@ -16,7 +16,7 @@ export default{
         //console.log(decoded);
         req.userId = decoded.userId;
         req.roleUser = decoded.role;
-        //console.log("Payload:",req.accessTokenPayload);
+        //console.log("userId:",req.userId);
         next();
       } catch (err) {
         //console.log(err);
@@ -119,30 +119,24 @@ export default{
       });
     }
     let request = await requestService.findById(id);
-
-    if(request){
-      if(request.student === req.userId){
-        req.roleReq = "student";
-        
-      }
-      else{
+    if(!request)
+      return res.status(404).json({
+        message: 'No found request'
+    });
+    
+    if(request.student+"" === req.userId){
+      req.roleReq = "student";
+    }
+    else{
         const check = await classMemberService.findARoleInAClass(req.userId,request.class,"teacher");
-        if(check){
-          req.roleReq = "teacher";
-          
-        }
-        else{
+        if(!check)
           return res.status(401).json({
             message: 'You do not have permision to access this request'
           });
-        }
+        req.roleReq = "teacher";
+        req.request = request;
         
-        }
-      
-    }else
-      return res.status(404).json({
-        message: 'No found request'
-      });
+    }
     next();
   },
 }

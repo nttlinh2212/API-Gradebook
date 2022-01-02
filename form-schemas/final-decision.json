@@ -1,9 +1,6 @@
 {
   "type": "object",
   "properties": {
-    "requestId": {
-      "type": "string"
-    },
     "finalGrade": {
       "type": "number",
       "exclusiveMinimum": 0,
@@ -11,7 +8,7 @@
     }
   },
   "required": [
-    "requestId","finalGrade"
+    "finalGrade"
   ],
   "additionalProperties": false
 }

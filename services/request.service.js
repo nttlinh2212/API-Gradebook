@@ -15,8 +15,8 @@ const requestService = {
     },
     async findRequestsOfAStudent(userId) {
         let list =  await requestModel.find({
-            user:userId
-        }).sort({ createdAt: -1 })
+            student:userId
+        })
         .populate({
             path:"class",
             select:{
@@ -32,7 +32,8 @@ const requestService = {
             finalGrade:1,
             "status":1,
             "createdAt":1
-        });
+        }).sort({ createdAt: -1 });
+        //console.log(list);
         let ret = [];
         for (let i = 0;i< list.length;i++) {
             const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
@@ -63,6 +64,9 @@ const requestService = {
         let classes = [];
         for (const c of raw) {
             classes.push({class:c.class});
+        }
+        if(!classes||classes.length === 0){
+            throw new Error({message:"You do not receive any request!"})
         }
         //console.log("Classes",classes)
         let list =  await requestModel.find({ 
@@ -134,8 +138,7 @@ const requestService = {
                 _id: 1,
                 name:1
             }
-        },
-        {
+        }).populate({
             path:"student",
             select:{
                 _id: 1,
@@ -152,7 +155,7 @@ const requestService = {
             "status":1,
             "createdAt":1
         });
-        const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+        const gradeComp = await classService.findOneGradeFinalize(raw.class._id,raw.gradeIdentity);
         let ret = {
             _id:raw._id,
             class:raw.class,
@@ -173,9 +176,15 @@ const requestService = {
         return ret;
     },
     async findCommentsOfAReq(requestId) {
-        return requestModel.findOne({_id:requestId}).select({
+        return requestModel.findOne({_id:requestId}).populate({
+            path:"comments.user",
+            select:{
+                _id: 1,
+                name:1,
+            }
+        }).select({
             comments:1
-        }.sort({ "comments.createdAt": 1 }));
+        }).sort({ "comments.createdAt": 1 });
     },
     async findByIdHavingSelect(requestId,select) {
         return requestModel.findOne({_id:requestId}).select(select);
@@ -195,7 +204,7 @@ const requestService = {
             { $push: { comments: commentObj } },
             ret
         );
-        return ret;
+        return {message:"Commented successfully"};
     },
 
     removeById(requestId) {
