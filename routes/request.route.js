@@ -9,6 +9,7 @@ import classMemberService from '../services/class-member.service.js';
 import classService from '../services/class.service.js';
 import gradeService from '../services/grade.service.js';
 import userService from '../services/user.service.js';
+import notiService from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -65,6 +66,19 @@ router.post('/',validate(requestSchema),authMdw.auth, async function (req, res) 
   }
   req.body.student = req.userId;
   const ret = await requestService.add(req.body)
+
+  //------------------add noti --------------------------------------
+  //find all teachers in a class
+  const listTeachers = await classMemberService.findAllTeachersInAClass(req.body.class);
+  if(!listTeachers){
+    res.status(200).json(ret);
+  }
+  const classInfo = await classService.findById(req.body.class);
+  for (const t of listTeachers) {
+    await notiService.addNewRequest(t.user._id,classInfo.name,ret._id,req.userId);
+  }
+  
+  
   res.status(200).json(ret);
 });
 router.get('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
@@ -75,6 +89,11 @@ router.get('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
 });
 router.delete('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
+  if(req.request.status === "close"){
+    return res.status(400).json({
+      message: "The request is closed by the teacher."
+    })
+  }
   const finalGrade = req.body.finalGrade;
   if(req.roleReq!=="teacher")
     return res.status(403).json({
@@ -88,11 +107,15 @@ router.delete('/:id',authMdw.auth, authMdw.authRequest, async function (req, res
   },{
     point:finalGrade
   })
-  gradeService.patch()
   const update2 = await requestService.patch(id,{
     finalGrade,
     status:"close"
   });
+  //------------------add noti --------------------------------------
+  
+  const teacherName = (await userService.findById(req.userId)).name;
+  await notiService.addNewDecision(req.request.student,teacherName,id,req.userId);
+  
   res.status(200).json({
     message:"Close request successfully"
   });
@@ -121,11 +144,21 @@ router.get('/:id/comments',authMdw.auth, authMdw.authRequest, async function (re
 });
 router.post('/:id/comments',validate(commentSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
+  if(req.request.status === "close"){
+    return res.status(400).json({
+      message: "The request is closed by the teacher."
+    })
+  }
   let obj = {
     user: req.userId,
     content: req.body.content
   }
   const ret = await requestService.addNewComment(id,obj);
+  //------------------add noti --------------------------------------
+  if(req.roleReq === "teacher"){
+    const teacherName = (await userService.findById(req.userId)).name;
+    await notiService.addNewReply(req.request.student,teacherName,id,req.userId)
+  }
   res.status(201).json(ret);
 });
 // router.post('/:id/final',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {

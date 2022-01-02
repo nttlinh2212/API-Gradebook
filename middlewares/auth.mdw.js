@@ -109,6 +109,7 @@ export default{
       return res.status(401).json({
         message: 'This class is disable. Please contact Admin to recover this class.'
       });
+    req.className = classObj.name;
     next();
   },
   async authRequest(req,res,next){
@@ -126,6 +127,7 @@ export default{
     
     if(request.student+"" === req.userId){
       req.roleReq = "student";
+      req.request = request;
     }
     else{
         const check = await classMemberService.findARoleInAClass(req.userId,request.class,"teacher");

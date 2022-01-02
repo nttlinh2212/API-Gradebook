@@ -24,7 +24,12 @@ const notiSchema = new mongoose.Schema({
     message:{
         type:String,
         required:true,
-    }
+    },
+    byUser:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user",
+        required:true,
+    },
     
 },
 {
