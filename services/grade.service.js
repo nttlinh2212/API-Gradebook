@@ -16,6 +16,11 @@ const gradeService = {
     async findById(gradeId) {
         return gradeModel.findOne({_id:gradeId});
     },
+    findStudentComposition(studentId, gradeIdentity) {
+        return gradeModel.findOne({
+            studentId,gradeIdentity
+        });
+    },
     async findByIdHavingSelect(gradeId,select) {
         return gradeModel.findOne({_id:gradeId}).select(select);
     },

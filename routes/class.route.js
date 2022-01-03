@@ -11,6 +11,7 @@ import jwt from 'jsonwebtoken';
 import renderContentEmail from '../utils/email-invite-template.js';
 import mongoose from 'mongoose';
 import gradeService from '../services/grade.service.js';
+import notiService from '../services/notification.service.js';
 
 const router = express.Router();
 const inviteEmailSchema = JSON.parse(await readFile(new URL('../form-schemas/invite-email.json', import.meta.url)));
@@ -77,7 +78,7 @@ router.get('/:id/key/:key', authMdw.auth,authMdw.class, async function (req, res
     participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
-      err: "Not found class!"
+      message: "Not found class!"
     });
   }
   
@@ -86,7 +87,7 @@ router.get('/:id/key/:key', authMdw.auth,authMdw.class, async function (req, res
   const isCorrect = await classService.isCorrectKey(id,key);
   if(!isCorrect)
     return res.status(400).json({
-      err: "Key is not right!"
+      message: "Key is not right!"
     });
   const ret = await classMemberService.add({
     user:req.userId,
@@ -174,12 +175,12 @@ router.post('/:id/send-invite-email/',validate(inviteEmailSchema), authMdw.auth 
       participating = await classMemberService.findAMemberInAClass(invitedUser._id,id);
     }catch(err){
       return res.status(404).json({
-        err: "Not found class!"
+        message: "Not found class!"
       });
     }
     if(participating){
       return res.status(404).json({
-        err: `Can not invite since ${email} is a member of this class`
+        message: `Can not invite since ${email} is a member of this class`
       });
     
     }
@@ -235,7 +236,7 @@ router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async functi
     participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
-      err: "Not found class!"
+      message: "Not found class!"
     });
   }
   
@@ -255,7 +256,7 @@ router.get('/:id/confirm-invite-email', authMdw.auth ,authMdw.class,async functi
   const{email,role,classId}=decoded;
   if(id!==classId||email!==user.email){
     return res.status(401).json({
-      err: "invalid link"
+      message: "invalid link"
     });
   }
   const className = (await classService.findById(classId)).name;
@@ -277,7 +278,7 @@ router.post('/:id/confirm-invite-email/',validate(tokenSchema), authMdw.auth ,au
     participating = await classMemberService.findAMemberInAClass(req.userId,id);
   }catch(err){
     return res.status(404).json({
-      err: "Not found class!"
+      message: "Not found class!"
     });
   }
   
@@ -288,7 +289,7 @@ router.post('/:id/confirm-invite-email/',validate(tokenSchema), authMdw.auth ,au
   const{email,role,classId}=decoded;
   if(id!==classId||email!==user.email){
     return res.status(401).json({
-      err: "invalid link"
+      message: "invalid link"
     });
   }
   const ret = await classMemberService.add({
@@ -313,7 +314,7 @@ router.patch('/:id/grade-structure', validate(gradeStructureSchema), authMdw.aut
   }
   if(sum>10){
     return res.status(400).json({
-      err: "Total score is not more than 10",
+      message: "Total score is not more than 10",
     });
   }
   
@@ -342,6 +343,7 @@ router.delete('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember
   const retJson = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
   res.status(200).json(retJson);
 });
+//-------------------------------MARK FINALIZE FOR A GRADE COMPOSITION---------------------------------
 router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,authMdw.authTeacher,authMdw.class, async function (req, res) {
   const classId = req.params.id || 0;
   const compositionId = req.params.identity || 0;
@@ -354,7 +356,18 @@ router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,a
     }
   });
   const retJson = await classService.findByIdHavingSelect(classId, {"gradeStructure":1});
-  res.status(200).json(retJson);
+  //------------------add to noti list------------------------------------
+  const listStudents = await classMemberService.findAllStudentsInAClass(classId);
+  if(!listStudents)
+    return res.status(200).json({
+      message:"Mark finalized successfully"
+    });
+  for (const s of listStudents) {
+    const element = await notiService.addNewFinalize(s.user._id,classId,req.className,req.userId)
+  }
+  res.status(200).json({
+    message:"Mark finalized successfully"
+  });
   
 });
 //------------------------add list students---------------------------------
@@ -371,7 +384,7 @@ router.post('/:id/list-students', validate(listStudentsSchema), authMdw.auth ,au
   });
   if(isDuplicate){
     return res.status(400).json({
-      err: `Duplicate StudentID`,
+      message: `Duplicate StudentID`,
     });
   }
   //----------------done check duplicate studentid-------------------
@@ -428,7 +441,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
         throw new Error("Grade is not more than 10 or less than 0")
     } catch (error) {
       return res.status(400).json({
-        err: "Invalid grade",
+        message: "Invalid grade",
       });
     }
   }
@@ -436,7 +449,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   const check = await classService.findOneGrade(classId,identity);
   if(!check){
     return res.status(400).json({
-      err: 'Grade do not exist in Grade Structure',
+      message: 'Grade do not exist in Grade Structure',
     });
   }
   //console.log("CHECK identity:",check);
@@ -449,7 +462,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
   });
   if(isDuplicate){
     return res.status(400).json({
-      err: `Duplicate StudentID`,
+      message: `Duplicate StudentID`,
     });
   }
   //----------------done check duplicate studentid-------------------
@@ -460,7 +473,7 @@ router.post('/:id/student-grades', validate(studentGradesSchema), authMdw.auth ,
     console.log("EXIT STUDENTID",exist);
     if(!exist){
       return res.status(400).json({
-        err: `${s.studentId} is not in class`,
+        message: `${s.studentId} is not in class`,
       });
     }
   }
@@ -500,14 +513,14 @@ router.patch('/:id/cell-grades-board',validate(cellGradesBoardSchema), authMdw.a
   console.log("StudentId in this class", studentId, classId, exist1);
   if(!exist1){
     return res.status(400).json({
-      err: `Do not have ${studentId} in this class`,
+      message: `Do not have ${studentId} in this class`,
     });
   }
   //----------------------------check identity in grade structure-----------------
   const exist2 = await classService.findOneGrade(classId,identity)
   if(!exist2){
     return res.status(400).json({
-      err: `Do not have this assignment in this class`,
+      message: `Do not have this assignment in this class`,
     });
   }
   //-----------------------------update grade of an assignmnet of a student--------
@@ -532,7 +545,7 @@ router.get('/:id/grades-board/:studenId', authMdw.auth ,authMdw.authMember,authM
   console.log("StudentId in this class", studentId, classId, exist1);
   if(!exist1){
     return res.status(400).json({
-      err: `Do not have ${studentId} in this class`,
+      message: `Do not have ${studentId} in this class`,
     });
   }
  //------------------------------get info grades of student to return--------------

@@ -42,6 +42,20 @@ const classService = {
         
         });
     },
+    findOneGradeFinalize(classId,identity){
+        return classModel.findOne({
+            _id:classId,
+            'gradeStructure.identity': identity,
+            'gradeStructure.finalized': true,
+        },{"gradeStructure.$":1})    
+    },
+    // findDetailOneGrade(classId,identity){
+    //     return classModel.findOne({
+    //         _id:classId,
+    //         'gradeStructure.identity': identity
+    //     },{"gradeStructure.$":1})
+             
+    // },
     async findById(classId) {
         return classModel.findOne({_id:classId});
     },
@@ -131,11 +145,18 @@ const classService = {
             //-----------------map to account----------------------------
             const rawInfoStudent = await userService.findByStudentId(s.studentId)
             //console.log(rawInfoStudent);
-            if(rawInfoStudent)
-                newObj.account={
-                    _id:rawInfoStudent._id,
-                    name:rawInfoStudent.name,
-                };
+            if(rawInfoStudent){
+                if(await classMemberService.findARoleInAClass(rawInfoStudent._id,classId,"student")){
+                    newObj.account={
+                        _id:rawInfoStudent._id,
+                        name:rawInfoStudent.name,
+                    };
+                }
+                else
+                newObj.account=null;
+            }
+                
+                
             else
                 newObj.account=null;
             // newObj.account={

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import classMemberService from '../services/class-member.service.js';
 import userService from '../services/user.service.js';
 import classService from '../services/class.service.js';
+import requestService from '../services/request.service.js';
 
 
 dotenv.config();
@@ -15,7 +16,7 @@ export default{
         //console.log(decoded);
         req.userId = decoded.userId;
         req.roleUser = decoded.role;
-        //console.log("Payload:",req.accessTokenPayload);
+        //console.log("userId:",req.userId);
         next();
       } catch (err) {
         //console.log(err);
@@ -108,6 +109,36 @@ export default{
       return res.status(401).json({
         message: 'This class is disable. Please contact Admin to recover this class.'
       });
+    req.className = classObj.name;
     next();
-  }
+  },
+  async authRequest(req,res,next){
+    const id = req.params.id;
+    if(!id){
+      return res.status(404).json({
+        message: 'Not found request'
+      });
+    }
+    let request = await requestService.findById(id);
+    if(!request)
+      return res.status(404).json({
+        message: 'No found request'
+    });
+    
+    if(request.student+"" === req.userId){
+      req.roleReq = "student";
+      req.request = request;
+    }
+    else{
+        const check = await classMemberService.findARoleInAClass(req.userId,request.class,"teacher");
+        if(!check)
+          return res.status(401).json({
+            message: 'You do not have permision to access this request'
+          });
+        req.roleReq = "teacher";
+        req.request = request;
+        
+    }
+    next();
+  },
 }

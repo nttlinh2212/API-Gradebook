@@ -27,22 +27,22 @@ const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 router.post('/', validate(schema), async function (req, res) {
   const user = await userService.findByEmail(req.body.email);
   if (user === null) {
-    return res.status(401).json({
+    return res.status(400).json({
       message:"Invalid email or password"
     });
   }
   if (user.status === "disable") {
-    return res.status(401).json({
+    return res.status(410).json({
       message:"This account is disable. Please contact Admin to recover this account."
     });
   }
   if (!user.verified) {
-    return res.status(401).json({
+    return res.status(411).json({
       message:"This email is not yet verified. Please verify this email to continue using the application."
     });
   }
   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
-    return res.status(401).json({
+    return res.status(400).json({
       message:"Invalid email or password"
     });
   }
@@ -61,7 +61,7 @@ router.post('/', validate(schema), async function (req, res) {
     rfToken: refreshToken
   });
 
-  res.json({
+  res.status(200).json({
     authenticated: true,
     _id:user._id,
     firstName:user.firstName,
@@ -265,7 +265,7 @@ router.post('/verify-email/confirm', validate(tokenSchema), async function (req,
   } catch (err) {
     //console.log(err);
     return res.status(400).json({
-      message: 'invalid link'
+      message: 'Invalid link'
     });
   }
   
@@ -351,7 +351,7 @@ router.post('/reset-pw/confirm', validate(resetPassSchema), async function (req,
   } catch (err) {
     //console.log(err);
     return res.status(400).json({
-      message: 'invalid link'
+      message: 'Invalid link'
     });
   }
   

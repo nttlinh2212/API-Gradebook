@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "finalGrade": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum":10
+    }
+  },
+  "required": [
+    "finalGrade"
+  ],
+  "additionalProperties": false
+}

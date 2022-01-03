@@ -23,6 +23,12 @@ const classMemberService = {
             _id:1
         })
     },
+    findAllClasses(userId,role) {
+        return classMemberModel.find({
+            user:userId,
+            role
+        }).select("class");
+    },
     // findStudentIdInAClass(studentId,classId){
     //     return classMemberModel.findOne({
     //         class:classId,
@@ -48,6 +54,9 @@ const classMemberService = {
     },
     async findAMemberInAClass(memberId, classId) {
         return classMemberModel.findOne({user:memberId,class:classId});
+    },
+    async findARoleInAClass(memberId, classId,role) {
+        return classMemberModel.findOne({user:memberId,class:classId,role});
     },
     async findAllStudentsInAClass(classId) {
         return classMemberModel.find({

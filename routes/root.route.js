@@ -41,7 +41,7 @@ router.post('/classes/join',authMdw.auth, async function (req, res) {
   const success = await classService.findByCode(code)
   if(!success){
     return res.status(400).json({
-      err: "Not found Class"
+      message: "Not found Class"
     });
   }
   const id = success._id;
@@ -69,14 +69,14 @@ router.post('/register', validate(userSchema), async function (req, res) {
   console.log(duplicate);
   if(duplicate){
     return res.status(400).json({
-      err: "Email is not available"
+      message: "Email is not available"
     });
   }
   try{
     ret = await userService.add(user);
   }catch(err){
     return res.status(400).json({
-      err: "Invalid Form"
+      message: "Invalid Form"
     });
   }
   
