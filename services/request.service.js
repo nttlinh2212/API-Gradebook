@@ -37,6 +37,9 @@ const requestService = {
         let ret = [];
         for (let i = 0;i< list.length;i++) {
             const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+            if(!gradeComp || gradeComp.gradeStructure.length===0){
+                continue
+            }
             let element = {
                 _id:list[i]._id,
                 class:list[i].class,
@@ -49,6 +52,7 @@ const requestService = {
                 .zone("+07:00")
                 .format('YYYY-MM-DD HH:mm:ss')
             }
+            //console.log(gradeComp);
             element.gradeComposition = {
                 identity: gradeComp.gradeStructure[0].identity,
                 name: gradeComp.gradeStructure[0].name,
@@ -98,7 +102,11 @@ const requestService = {
         });
         let ret = [];
         for (let i = 0;i< list.length;i++) {
-            const gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+            let gradeComp = await classService.findOneGradeFinalize(list[i].class._id,list[i].gradeIdentity);
+            if(!gradeComp||gradeComp.gradeStructure.length===0){
+                continue
+            }
+            //console.log("gradecomp:",gradeComp);
             let element = {
                 _id:list[i]._id,
                 class:list[i].class,
@@ -192,7 +200,7 @@ const requestService = {
     async add(reqObj) {
         const studentId = (await userService.findById(reqObj.student)).studentId;
         const composition = await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity);
-        const curGrade = composition ?composition.point:null;
+        const curGrade = composition ?composition.point:0;
         reqObj.curGrade = curGrade;
         //console.log(reqObj);
         const reqDoc =  new requestModel(reqObj);
@@ -200,12 +208,25 @@ const requestService = {
         return ret;
     },
     async addNewComment(requestId,commentObj) {
-       let ret = await requestModel.update(
+       let ret = await requestModel.findOneAndUpdate(
             { _id: requestId }, 
             { $push: { comments: commentObj } }
         );
         console.log("info ret:",ret);
-        return {message:"Commented successfully"};
+        const c = ret.comments.pop();
+        const infoUser = await userService.findById(c.user);
+        return {
+            _id:c._id,
+            user:{
+                _id:infoUser._id,
+                name:infoUser.name
+            },
+            content:c.content,
+            createdAt:moment(c.createdAt)
+            .zone("+07:00")
+            .format('YYYY-MM-DD HH:mm:ss')
+          }
+        
     },
 
     removeById(requestId) {

@@ -40,7 +40,7 @@ router.post('/',validate(requestSchema),authMdw.auth, async function (req, res) 
   try{
     const isJoin = await classMemberService.findARoleInAClass(req.userId,req.body.class,"student");
     const isComposition = await classService.findOneGradeFinalize(req.body.class,req.body.gradeIdentity);
-    if(!isJoin||!isComposition){
+    if(!isJoin||!isComposition||isComposition.gradeStructure.length===0){
       return res.status(400).json({
         message: "Invalid classId or gradeIdentity."
       })
@@ -159,14 +159,7 @@ router.post('/:id/comments',validate(commentSchema),authMdw.auth, authMdw.authRe
     const teacherName = (await userService.findById(req.userId)).name;
     await notiService.addNewReply(req.request.student,teacherName,id,req.userId)
   }
-  res.status(201).json({
-    _id:c._id,
-    user:c.user,
-    content:c.content,
-    createdAt:moment(c.createdAt)
-    .zone("+07:00")
-    .format('YYYY-MM-DD HH:mm:ss')
-  });
+  res.status(201).json(ret);
 });
 // router.post('/:id/final',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
 //   if(req.roleReq === "student"){

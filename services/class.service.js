@@ -47,7 +47,9 @@ const classService = {
             _id:classId,
             'gradeStructure.identity': identity,
             'gradeStructure.finalized': true,
-        },{"gradeStructure.$":1})    
+        },{_id: 0, gradeStructure: {$elemMatch: {identity,finalized:true}}})    
+        
+
     },
     // findDetailOneGrade(classId,identity){
     //     return classModel.findOne({
