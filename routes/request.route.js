@@ -159,7 +159,14 @@ router.post('/:id/comments',validate(commentSchema),authMdw.auth, authMdw.authRe
     const teacherName = (await userService.findById(req.userId)).name;
     await notiService.addNewReply(req.request.student,teacherName,id,req.userId)
   }
-  res.status(201).json(ret);
+  res.status(201).json({
+    _id:c._id,
+    user:c.user,
+    content:c.content,
+    createdAt:moment(c.createdAt)
+    .zone("+07:00")
+    .format('YYYY-MM-DD HH:mm:ss')
+  });
 });
 // router.post('/:id/final',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
 //   if(req.roleReq === "student"){

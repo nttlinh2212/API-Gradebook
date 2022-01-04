@@ -200,12 +200,11 @@ const requestService = {
         return ret;
     },
     async addNewComment(requestId,commentObj) {
-       let ret;
-        await requestModel.update(
+       let ret = await requestModel.update(
             { _id: requestId }, 
-            { $push: { comments: commentObj } },
-            ret
+            { $push: { comments: commentObj } }
         );
+        console.log("info ret:",ret);
         return {message:"Commented successfully"};
     },
 

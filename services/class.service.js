@@ -93,7 +93,7 @@ const classService = {
         if(!classObj)
             return null;
         if(role==="student"){
-            return retJson = {
+            return {
               _id:classObj._id,
               name:classObj.name,
               description:classObj.description,
@@ -102,7 +102,7 @@ const classService = {
             }
             
         }
-        return retJson = {
+        return {
             _id:classObj._id,
             name:classObj.name,
             description:classObj.description,
