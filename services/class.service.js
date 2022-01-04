@@ -151,10 +151,21 @@ const classService = {
         let sample = [];
         let i = 0;
         for (const assign of gradeStructure) {
-            const element = {
-                name:assign.name,
-                identity:assign.identity,
-                point:null
+            let element = {};
+            if(assign.finalized){
+                element = {
+                    name:assign.name,
+                    identity:assign.identity,
+                    finalized:assign.finalized,
+                    point:0,
+                }
+            }else{
+                element = {
+                    name:assign.name,
+                    identity:assign.identity,
+                    finalized:assign.finalized,
+                    point:null,
+                }
             }
             identity_point.set(assign.identity, assign.point);//point la poin of grade structure
             identity_grade.set(assign.identity, i);
@@ -194,10 +205,15 @@ const classService = {
             
             const gradesOfAStudent = await gradeService.findGradesOfAStudent(s.studentId,classId);
             //console.log("Grdae of A Student in db:",gradesOfAStudent);
+            //console.log(identity_grade);
             //console.log(newGrades);
             for (const g of gradesOfAStudent) {
-                if(!identity_grade.get(g.gradeIdentity))
+                const exist = identity_grade.get(g.gradeIdentity);
+                if(exist===null || exist===undefined){
                     continue
+                }
+                    
+                //console.log(identity_grade.get(g.gradeIdentity));
                 newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
                 total+=identity_point.get(g.gradeIdentity)*g.point/10;
             }
@@ -224,13 +240,24 @@ const classService = {
         let sample = [];
         let i = 0;
         for (const assign of gradeStructure) {
-            if(flag &&!assign.finalized){
-                continue;
-            }
-            const element = {
-                name:assign.name,
-                identity:assign.identity,
-                point:null,
+            // if(flag &&!assign.finalized){
+            //     continue;
+            // }
+            let element = {};
+            if(assign.finalized){
+                element = {
+                    name:assign.name,
+                    identity:assign.identity,
+                    finalized:assign.finalized,
+                    point:0,
+                }
+            }else{
+                element = {
+                    name:assign.name,
+                    identity:assign.identity,
+                    finalized:assign.finalized,
+                    point:null,
+                }
             }
             if(flag){
                 element.pointStructure=assign.point;
@@ -265,10 +292,20 @@ const classService = {
         const gradesOfAStudent = await gradeService.findGradesOfAStudent(studentId,classId);
         //console.log("Grdae of A Student in db:",gradesOfAStudent);
         for (const g of gradesOfAStudent) {
-            const element = newGrades[identity_grade.get(g.gradeIdentity)]
+            const exist = identity_grade.get(g.gradeIdentity);
+            if(exist===null || exist===undefined){
+                continue
+            }
+            let element = newGrades[exist];
             if(element){
-                element.point = g.point;
-                total+=identity_point.get(g.gradeIdentity)*g.point/10;
+                if(flag&&!element.finalized){//la student va chua finalize -> null
+                    element.point = null;
+                }
+                else{//la student va diem da finalize || giao vien
+                    element.point = g.point;
+                    total+=identity_point.get(g.gradeIdentity)*g.point/10;
+                }
+                
             }
             
         }
