@@ -67,6 +67,11 @@ router.patch('/password',validate(passSchema),authMdw.auth, async function (req,
   //     message:"New password is not equal confirm password!"
   //   });
   // }
+  if(!user.password){
+    return res.status(400).json({
+      message:"Current password does not exist. Please click on forget password in the login page to create a password!"
+    });
+  }
   if (bcrypt.compareSync(req.body.curPass, user.password) === false) {
     return res.status(400).json({
       message:"Current password is wrong!"

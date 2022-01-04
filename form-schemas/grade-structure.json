@@ -12,7 +12,12 @@
                 "exclusiveMinimum": 0,
                 "maximum":10
               },
-              "identity": {"type": "string"}
+              "identity": {"type": "string"},
+              "finalized": {
+                "type": "boolean",
+                "enum":[true,false]
+              }
+
           }
         }
     }

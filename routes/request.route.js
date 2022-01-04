@@ -87,7 +87,7 @@ router.get('/:id',authMdw.auth, authMdw.authRequest, async function (req, res) {
   ret.role = req.roleReq;
   res.status(200).json(ret);
 });
-router.delete('/:id',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
+router.patch('/:id',validate(finalDecisionSchema),authMdw.auth, authMdw.authRequest, async function (req, res) {
   const id = req.params.id;
   if(req.request.status === "close"){
     return res.status(400).json({

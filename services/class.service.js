@@ -194,7 +194,10 @@ const classService = {
             
             const gradesOfAStudent = await gradeService.findGradesOfAStudent(s.studentId,classId);
             //console.log("Grdae of A Student in db:",gradesOfAStudent);
+            //console.log(newGrades);
             for (const g of gradesOfAStudent) {
+                if(!identity_grade.get(g.gradeIdentity))
+                    continue
                 newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
                 total+=identity_point.get(g.gradeIdentity)*g.point/10;
             }
