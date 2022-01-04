@@ -33,7 +33,8 @@ const requestSchema = new mongoose.Schema({
     },
     curGrade:{
         type:Number,
-        required:true,
+        //required:true,
+        default:null
     },
     expectedGrade:{
         type:Number,

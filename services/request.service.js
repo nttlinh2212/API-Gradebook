@@ -191,8 +191,10 @@ const requestService = {
     },
     async add(reqObj) {
         const studentId = (await userService.findById(reqObj.student)).studentId;
-        const curGrade = (await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity)).point;
+        const composition = await gradeService.findStudentComposition(studentId,reqObj.gradeIdentity);
+        const curGrade = composition ?composition.point:null;
         reqObj.curGrade = curGrade;
+        //console.log(reqObj);
         const reqDoc =  new requestModel(reqObj);
         const ret = await reqDoc.save();
         return ret;
