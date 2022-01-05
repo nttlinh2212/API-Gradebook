@@ -13,14 +13,23 @@ const notiService = {
     async findByIdHavingSelect(notiId,select) {
         return notiModel.findOne({_id:notiId}).select(select);
     },
-    async findByUser(userId) {
+    async findByUser(userId,limit) {
+        if(!limit){
+            return notiModel.find({user:userId}).populate({
+                path:"byUser",
+                select:{
+                    _id: 1,
+                    name:1,
+                }
+            }).sort({ "createdAt": -1 })
+        }
         return notiModel.find({user:userId}).populate({
             path:"byUser",
             select:{
                 _id: 1,
                 name:1,
             }
-        }).sort({ "createdAt": -1 }).limit(5);
+        }).sort({ "createdAt": -1 }).limit(limit);
     },
     async addNewFinalize(userId,classId,className,byUserId) {
         const notiDoc =  new notiModel({

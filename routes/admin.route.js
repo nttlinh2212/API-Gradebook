@@ -1,5 +1,5 @@
 import express from 'express';
-
+import moment from 'moment';
 import { readFile } from 'fs/promises';
 import bcrypt from 'bcryptjs';
 import userService from '../services/user.service.js';
@@ -11,13 +11,43 @@ const router = express.Router();
 // const profileSchema = JSON.parse(await readFile(new URL('../form-schemas/profile.json', import.meta.url)));
 // const passSchema = JSON.parse(await readFile(new URL('../form-schemas/password.json', import.meta.url)));
 const studentidSchema = JSON.parse(await readFile(new URL('../form-schemas/studentid.json', import.meta.url)));
-
+const queryUserSchema = JSON.parse(await readFile(new URL('../form-schemas/query-user.json', import.meta.url)));
 
 //------------------------USERS----------------------------------------------------
-router.get('/users', async function (req, res) {
-  const role = req.query.role
-  const user = await userService.findAllHavingSelect({role},role==="member");
-  res.status(200).json(user);
+router.get('/users',validate(queryUserSchema), async function (req, res) {
+  
+  const role = req.query.role||"member";
+  let sort;
+  try{
+    sort = +req.query.sort||1;
+  }catch(err){
+    return res.status(400).json({
+      message: "sort is invalid!"
+    });
+  }
+  const search = req.query.search||null;
+  if(!(role==="member"||role==="admin")){
+    return res.status(400).json({
+      message: "role is invalid!"
+    });
+  }
+  if(!(sort===1||sort===-1)){
+    return res.status(400).json({
+      message: "sort is invalid!"
+    });
+  }
+
+  let query = {
+    role
+  };
+  if(search){
+    query.$text = {$search: search}
+  }
+  let users = await userService.findAllHavingSelect(query,role==="member",{createdAt:sort});
+  
+  res.status(200).json(
+    users
+  );
 });
 router.delete('/users/:id', async function (req, res) {
   const id = req.params.id;
@@ -97,7 +127,27 @@ router.post('/admins',validate(userSchema), async function (req, res) {
 });
 //-----------------------------------------CLASS-------------------
 router.get('/classes', async function (req, res) {
-  const classObj = await classService.findAllHavingSelect();
+  let sort;
+  try{
+    sort = +req.query.sort||1;
+  }catch(err){
+    return res.status(400).json({
+      message: "sort is invalid!"
+    });
+  }
+  
+  const search = req.query.search||null;
+  if(!(sort===1||sort===-1)){
+    return res.status(400).json({
+      message: "sort is invalid!"
+    });
+  }
+
+  let query = {}
+  if(search){
+    query.$text = {$search: search}
+  }
+  const classObj = await classService.findAllHavingSelect(query,{createdAt:sort});
   res.status(200).json(classObj);
 });
 router.delete('/classes/:id', async function (req, res) {

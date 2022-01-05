@@ -5,7 +5,9 @@ export default function validate(schema) {
     const ajv = new Ajv();
     const valid = ajv.validate(schema, req.body);
     if (!valid) {
-      return res.status(400).json(ajv.errors);
+      return res.status(400).json({
+        message:"You "+ajv.errors[0].message
+      });
     }
 
     next();
