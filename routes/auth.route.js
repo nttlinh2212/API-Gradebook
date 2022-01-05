@@ -28,7 +28,7 @@ router.post('/', validate(schema), async function (req, res) {
   const user = await userService.findByEmail(req.body.email);
   if (user === null) {
     return res.status(400).json({
-      message:"Invalid email or password"
+      message:"Invalid email or password."
     });
   }
   if (user.status === "disable") {
@@ -43,7 +43,7 @@ router.post('/', validate(schema), async function (req, res) {
   }
   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
     return res.status(400).json({
-      message:"Invalid email or password"
+      message:"Invalid email or password."
     });
   }
 
@@ -89,18 +89,18 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
       };
       const payload = { userId,role };
       const new_accessToken = jwt.sign(payload, SECRET_KEY, opts);
-      return res.json({
+      return res.status(200).json({
         accessToken: new_accessToken
       });
     }
 
-    return res.status(403).json({
+    return res.status(413).json({
       message: 'Refresh token is revoked.'
     });
 
   } catch (err) {
-    console.log(err);
-    return res.status(403).json({
+    //console.log(err);
+    return res.status(413).json({
       message: 'Invalid access token.'
     });
   }
@@ -155,7 +155,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
       }));
     }
     if (exist.status === "disable") {
-      return res.status(401).json({
+      return res.status(410).json({
         message:"This account is disable. Please contact Admin to recover this account."
       });
     }
@@ -186,7 +186,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     rfToken: refreshToken
   });
 
-  res.json({
+  res.status(200).json({
     authenticated: true,
     _id:userId,
     firstName,
@@ -212,12 +212,12 @@ router.post('/verify-email/send',validate(emailSchema),  async function (req, re
   //console.log("invited user:",verifiedUser)
   if(!verifiedUser){
     return res.status(404).json({
-      message: "Not found user"
+      message: "Not found user."
     });
   }
   if(verifiedUser.verified){
     return res.status(400).json({
-      message: "This account is verified before"
+      message: "This account is verified before."
     });
   }
   //create token
@@ -244,13 +244,13 @@ router.post('/verify-email/send',validate(emailSchema),  async function (req, re
     .then(() => {
       console.log('Email sent')
       return res.status(200).json({
-        message: "Send email successfully"
+        message: "Send email successfully!"
       });
     })
     .catch((error) => {
       console.error(error)
       return res.status(400).json({
-        message: "Send email fail"
+        message: "Send email fail!"
       });
     })
 
@@ -261,11 +261,11 @@ router.post('/verify-email/confirm', validate(tokenSchema), async function (req,
   let decoded = null;
   try{
     decoded = jwt.verify(token, SECRET_KEY_INVITE);
-    console.log("Payload:",decoded);
+    //console.log("Payload:",decoded);
   } catch (err) {
     //console.log(err);
     return res.status(400).json({
-      message: 'Invalid link'
+      message: 'Invalid link.'
     });
   }
   
@@ -273,17 +273,17 @@ router.post('/verify-email/confirm', validate(tokenSchema), async function (req,
   const user = await userService.findByEmail(email);
   if(!user){
     return res.status(404).json({
-      message: "Not found user"
+      message: "Not found user."
     });
   }
   if(user.verified){
     return res.status(400).json({
-      message: "This account is verified before"
+      message: "This account is verified before."
     });
   }
   const ret = await userService.patch(user._id,{"verified":true});
   return res.status(200).json({
-    message: "Verified successfully"
+    message: "Verified successfully!"
   });
  
 });
@@ -301,7 +301,7 @@ router.post('/reset-pw/send',validate(emailSchema),  async function (req, res) {
   //console.log("invited user:",verifiedUser)
   if(!user){
     return res.status(404).json({
-      message: "Not found user"
+      message: "Not found user."
     });
   }
   //create token
@@ -329,13 +329,13 @@ router.post('/reset-pw/send',validate(emailSchema),  async function (req, res) {
     .then(() => {
       console.log('Email sent')
       return res.status(200).json({
-        message: "Send email successfully"
+        message: "Send email successfully!"
       });
     })
     .catch((error) => {
       console.error(error)
       return res.status(400).json({
-        message: "Send email fail"
+        message: "Send email fail."
       });
     })
 
@@ -351,7 +351,7 @@ router.post('/reset-pw/confirm', validate(resetPassSchema), async function (req,
   } catch (err) {
     //console.log(err);
     return res.status(400).json({
-      message: 'Invalid link'
+      message: 'Invalid link.'
     });
   }
   
@@ -359,15 +359,15 @@ router.post('/reset-pw/confirm', validate(resetPassSchema), async function (req,
   const user = await userService.findByEmail(email);
   if(!user){
     return res.status(404).json({
-      message: "Not found user"
+      message: "Not found user."
     });
   }
 
   const password = bcrypt.hashSync(newPass, 10);
   const ret = await userService.patch(user._id,{password});
   //console.log("update password",ret,token,newPass);
-  res.status(201).json({
-    message:"Reset password successfully"
+  res.status(200).json({
+    message:"Reset password successfully!"
   });
  
 });

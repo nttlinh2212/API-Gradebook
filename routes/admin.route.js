@@ -21,10 +21,10 @@ router.get('/users', async function (req, res) {
 });
 router.delete('/users/:id', async function (req, res) {
   const id = req.params.id;
-  console.log("id=",id,"/",req.userId);
+  //console.log("id=",id,"/",req.userId);
   if(id===req.userId){
-    return res.status(400).json({
-      message: "You do not have permission to block your account"
+    return res.status(403).json({
+      message: "You do not have permission to block your account!"
     });
   }
   const user = await userService.patch(id,{status:"disable"})
@@ -33,8 +33,8 @@ router.delete('/users/:id', async function (req, res) {
 router.post('/users/:id', async function (req, res) {
   const id = req.params.id;
   if(id===req.userId){
-    return res.status(400).json({
-      message: "You do not have permission to enable your account"
+    return res.status(403).json({
+      message: "You do not have permission to enable your account!"
     });
   }
   const user = await userService.patch(id,{status:"enable"})
@@ -44,7 +44,7 @@ router.patch('/users/:id/studentid',validate(studentidSchema),async function (re
   const id = req.params.id;
   if((await userService.findById(id)).role==="admin")
     return res.status(400).json({
-      message: "Admin does not have studentid"
+      message: "Admin does not have studentId."
     });
   if(!req.body.studentId||req.body.studentId===""){
     req.body.studentId = null;
@@ -54,12 +54,12 @@ router.patch('/users/:id/studentid',validate(studentidSchema),async function (re
     exist = await userService.findByStudentId(req.body.studentId);
   if(exist){
     return res.status(400).json({
-      message: "StudentID is not available"
+      message: "StudentId is not available."
     });
   }
   const ret = await userService.patch(id,req.body)
-  res.status(201).json({
-    message:"update successfully"
+  res.status(200).json({
+    message:"Update successfully."
   });
 });
 //----------------------------------------MANAGE ADMIN ACCOUNT-ACCOUNTT--------------
@@ -74,14 +74,14 @@ router.post('/admins',validate(userSchema), async function (req, res) {
   console.log(duplicate);
   if(duplicate){
     return res.status(400).json({
-      message: "Email is not available"
+      message: "Email is not available."
     });
   }
   try{
     ret = await userService.add(user);
   }catch(err){
     return res.status(400).json({
-      message: "Invalid Form"
+      message: "Invalid Form."
     });
   }
   

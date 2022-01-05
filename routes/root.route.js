@@ -17,13 +17,13 @@ const userSchema = JSON.parse(await readFile(new URL('../form-schemas/user.json'
 
 
 router.get('/classes',authMdw.auth,authMdw.authMemberUser, async function (req, res) {
-  console.log('ROOT ROUTER: ');
+  //console.log('ROOT ROUTER: ');
   const list = await classMemberService.findAllClassesByUser(req.userId);
-  res.json(list);
+  res.status(200).json(list);
 });
 
 router.post('/classes',authMdw.auth, validate(schema), async function (req, res) {
-  console.log('ROOT ROUTER: ', req.body);
+  //console.log('ROOT ROUTER: ', req.body);
   req.body.createdUser=req.userId;
   
   const key = randomstring.generate(8);
@@ -40,23 +40,28 @@ router.post('/classes/join',authMdw.auth, async function (req, res) {
   const code = req.query.code;
   const success = await classService.findByCode(code)
   if(!success){
-    return res.status(400).json({
-      message: "Not found Class"
+    return res.status(404).json({
+      message: "Not found Class."
     });
   }
   const id = success._id;
   //--------- if joined class
   let participating = await classMemberService.findAMemberInAClass(req.userId,id);
-  if(participating)
-    return res.redirect(`/class/${id}`);
+  if(participating){
+    //return res.redirect(`/class/${id}`);
+    const classObj = await classService.findDetailClassInfoByIdWithRole(id,participating.role);
+    res.status(200).json(classObj);
+  }
   //-----------if not join class
   const ret = await classMemberService.add({
     user:req.userId, 
     role:"student",
     class:id
   });
-  console.log("Result of Adding new member:",ret);
-  return res.redirect(`/class/${id}`);
+  //console.log("Result of Adding new member:",ret);
+  //return res.redirect(`/class/${id}`);
+  const classObj = await classService.findDetailClassInfoByIdWithRole(id,"student");
+  res.status(200).json(classObj);
   
 });
 
@@ -69,14 +74,14 @@ router.post('/register', validate(userSchema), async function (req, res) {
   console.log(duplicate);
   if(duplicate){
     return res.status(400).json({
-      message: "Email is not available"
+      message: "Email is not available."
     });
   }
   try{
     ret = await userService.add(user);
   }catch(err){
     return res.status(400).json({
-      message: "Invalid Form"
+      message: "Invalid Form."
     });
   }
   

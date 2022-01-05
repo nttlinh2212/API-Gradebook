@@ -21,26 +21,26 @@ export default{
       } catch (err) {
         //console.log(err);
         return res.status(401).json({
-          message: 'Invalid access token.'
+          message: 'Invalid or expired access token.'
         });
       }
     } else {
       return res.status(401).json({
-        message: 'Access token not found.'
+        message: 'Access token is not found.'
       });
     }
   },
   authAdminUser(req,res,next){
     if(req.roleUser!=="admin")
       return res.status(403).json({
-        message: 'No permission'
+        message: 'You do not have permission to access this area!'
       });
     next();
   },
   authMemberUser(req,res,next){
     if(req.roleUser!=="member")
       return res.status(403).json({
-        message: 'No permission'
+        message: 'You do not have permission to access this area!'
       });
     next();
   },
@@ -49,7 +49,7 @@ export default{
     const id = req.params.id;
     if(!id){
       return res.status(404).json({
-        message: 'Not found class'
+        message: 'Not found class.'
       });
     }
     //console.log("Req.params.id=classid: ",id );
@@ -59,7 +59,7 @@ export default{
       //console.log("PARTICIPATING1: ",participating);
     }catch(err){
       return res.status(404).json({
-            message: 'Not found'
+            message: 'Not found.'
           });
     }
     
@@ -70,8 +70,8 @@ export default{
       //req.participating = participating;
       next();
     }else
-      return res.status(401).json({
-        message: 'No permission'
+      return res.status(403).json({
+        message: 'You do not have permission to access this area!'
       });
   },
   // async authMember(req, res, next) {
@@ -81,8 +81,8 @@ export default{
   async authStudent(req, res, next) {
     // const participating =req.participating;
     if(!(req.role==="student"))
-      return res.status(401).json({
-        message: 'No permission'
+      return res.status(403).json({
+        message: 'You do not have permission to access this area!'
       });
     const infoUser = await userService.findById(req.userId);
     req.studentId = infoUser.studentId||null;
@@ -91,8 +91,8 @@ export default{
   async authTeacher(req, res, next) {
     // const participating = req.participating;
     if(!(req.role==="teacher"))
-      return res.status(401).json({
-        message: 'No permission'
+      return res.status(403).json({
+        message: 'You do not have permission to access this area!'
       });
     
     next();
@@ -106,7 +106,7 @@ export default{
       classObj = await classService.findById(id);
     //console.log(classObj)
     if(classObj&&classObj.status === 'disable')
-      return res.status(401).json({
+      return res.status(410).json({
         message: 'This class is disable. Please contact Admin to recover this class.'
       });
     req.className = classObj.name;
@@ -115,14 +115,14 @@ export default{
   async authRequest(req,res,next){
     const id = req.params.id;
     if(!id){
-      return res.status(404).json({
-        message: 'Not found request'
+      return res.status(400).json({
+        message: 'Invalid id.'
       });
     }
     let request = await requestService.findById(id);
     if(!request)
       return res.status(404).json({
-        message: 'No found request'
+        message: 'No found request.'
     });
     
     if(request.student+"" === req.userId){
@@ -133,7 +133,7 @@ export default{
         const check = await classMemberService.findARoleInAClass(req.userId,request.class,"teacher");
         if(!check)
           return res.status(401).json({
-            message: 'You do not have permision to access this request'
+            message: 'You do not have permision to access this request!'
           });
         req.roleReq = "teacher";
         req.request = request;
