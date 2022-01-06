@@ -355,15 +355,11 @@ router.post('/:id/grade-structure/:identity', authMdw.auth ,authMdw.authMember,a
   //------------------add to noti list------------------------------------
   const listStudents = await classMemberService.findAllStudentsInAClass(classId);
   if(!listStudents)
-    return res.status(200).json({
-      message:"Mark finalized successfully!"
-    });
+    return res.status(200).json(retJson);
   for (const s of listStudents) {
     const element = await notiService.addNewFinalize(s.user._id,classId,req.className,req.userId)
   }
-  res.status(200).json({
-    message:"Mark finalized successfully!"
-  });
+  res.status(200).json(retJson);
   
 });
 //------------------------add list students---------------------------------
