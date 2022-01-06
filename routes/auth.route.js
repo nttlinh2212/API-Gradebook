@@ -16,6 +16,7 @@ const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/login.json', import.meta.url)));
 const emailSchema = JSON.parse(await readFile(new URL('../form-schemas/email.json', import.meta.url)));
 const tokenSchema = JSON.parse(await readFile(new URL('../form-schemas/token.json', import.meta.url)));
+const accessTokenSchema = JSON.parse(await readFile(new URL('../form-schemas/access-token.json', import.meta.url)));
 const resetPassSchema = JSON.parse(await readFile(new URL('../form-schemas/reset-pw.json', import.meta.url)));
 const rfSchema = JSON.parse(await readFile(new URL('../form-schemas/rf.json', import.meta.url)));
 
@@ -154,7 +155,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
         googleId
       }));
     }
-    if (exist.status === "disable") {
+    if (exist.status&&exist.status === "disable") {
       return res.status(410).json({
         message:"This account is disable. Please contact Admin to recover this account."
       });
@@ -377,11 +378,26 @@ router.post('/', validate(schema), (req,res,next) => {
   passport.authenticate('local', function (err, user, info){
   //console.log(user,info)
   if(!user){
-    const code = info.code;
-    delete info.code;
-    return res.status(code).json(info);
+    if(info&&info.code){
+      delete info.code;
+       return res.status(info.code).json(info);
+    }
+    return res.status(400).json(info);
   }
   return res.status(200).json(user);
   })(req, res, next)
+});
+router.post('/facebook', validate(accessTokenSchema), (req,res,next) => {
+  passport.authenticate('facebookToken', function (err, user, info){
+    console.log(err,info)
+    if(!user){
+      if(info&&info.code){
+        delete info.code;
+         return res.status(info.code).json(info);
+      }
+      return res.status(400).json(info);  
+    }
+    return res.status(200).json(user);
+    })(req, res, next)
 });
 export default router;

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type:String,
-        required:true,
+        required:false,
         unique:true,
         validate: function (email) {
             var reg = /\S+@\S+\.\S+/;
@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
         },
     },
     googleId: String,
+    facebookId: String,
     firstName: String,
     lastName: String,
     name:String,

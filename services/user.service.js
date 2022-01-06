@@ -6,6 +6,9 @@ const userService = {
     findByEmail(email) {
         return userModel.findOne({email});
     },
+    findByFbId(id) {
+        return userModel.findOne({facebookId:id});
+    },
     async findByStudentId(studentId) {
         return userModel.findOne({studentId});
     },  
