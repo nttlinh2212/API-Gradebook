@@ -4,19 +4,19 @@ import userModel from '../models/user.model.js';
 import classMemberService from './class-member.service.js';
 import gradeService from './grade.service.js';
 import userService from './user.service.js';
-
+import moment from 'moment';
 
 const classService = {
     findAll() {
         return classModel.find();
     },
-    async findAllHavingSelect() {
+    async findAllHavingSelect(query,sort) {
         let ret = [];
-        const listClasses = await classModel.find().populate(
+        const listClasses = await classModel.find(query).populate(
             {
                 path:"createdUser",
                 select:{name:1,_id:1}
-            });
+            }).sort(sort);
         for (const c of listClasses) {
             const students = await classMemberService.findAllStudentsInAClass(c._id);
             const numOfStudents = students.length;
@@ -29,6 +29,9 @@ const classService = {
                 createdUser: c.createdUser,
                 numOfStudents,
                 numOfTeachers,
+                createdAt : moment(c.createdAt)
+                .zone("+07:00")
+                .format('YYYY-MM-DD HH:mm:ss')
             }
             ret.push(obj);
         }

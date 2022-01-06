@@ -1,5 +1,6 @@
 
 import userModel from '../models/user.model.js';
+import moment from 'moment';
 
 const userService = {
     async findByEmail(email) {
@@ -14,27 +15,40 @@ const userService = {
     findAll() {
         return userModel.find();
     },
-    findAllHavingSelect(obj, flag) {
+    async findAllHavingSelect(obj, flag,sort) {
+        let ret = [];
         if(flag)
-            return userModel.find(obj).select({
+            ret = await userModel.find(obj).select({
                 _id:1,
                 email:1,
                 firstName:1,
                 lastName:1,
+                name:1,
                 studentId:1,
                 role:1,
                 "status":1,
+                createdAt:1
                 
-            });;
-        return userModel.find(obj).select({
+            }).sort(sort);
+        else
+            ret =  await userModel.find(obj).select({
             _id:1,
             email:1,
             firstName:1,
             lastName:1,
+            name:1,
             role:1,
             "status":1,
+            createdAt:1
             
-        });;
+        }).sort(sort);
+        ret = JSON.parse(JSON.stringify(ret));
+        for (const user of ret) {
+            user.createdAt = moment(user.createdAt)
+                .zone("+07:00")
+                .format('YYYY-MM-DD HH:mm:ss')
+        }
+        return ret;
     },
     async findById(userId) {
         return userModel.findOne({_id:userId});

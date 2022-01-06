@@ -9,7 +9,16 @@ const router = express.Router();
 
 
 router.get('/',authMdw.auth, async function (req, res) {
-  const raw = await notiService.findByUser(req.userId);
+  let limit = null;
+  try{
+    limit = +req.query.limit||null;
+  }catch(err){
+    res.status(400).json({
+      message:"limit must be number."
+    });
+  }
+  
+  const raw = await notiService.findByUser(req.userId,limit);
   let ret = [];
   if(raw){
       for (const n of raw) {

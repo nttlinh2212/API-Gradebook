@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum":["member","admin"]
+    },
+    "sort": {
+      "type": "string",
+      "enum":["asc","desc"]
+    },
+    "search": {
+      "type": "string"
+    }
+  },
+  "required": [
+    
+  ],
+  "additionalProperties": false
+}

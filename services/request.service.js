@@ -210,11 +210,15 @@ const requestService = {
     async addNewComment(requestId,commentObj) {
        let ret = await requestModel.findOneAndUpdate(
             { _id: requestId }, 
-            { $push: { comments: commentObj } }
+            { $push: { comments: commentObj } },
+            {
+                new:true
+            }
         );
         console.log("info ret:",ret);
         const c = ret.comments.pop();
         const infoUser = await userService.findById(c.user);
+        //--------------------------get info new reques-------------------
         return {
             _id:c._id,
             user:{
