@@ -8,6 +8,7 @@ import authMdw from '../middlewares/auth.mdw.js';
 import userService from '../services/user.service.js';
 import bcrypt from 'bcryptjs';
 
+
 const router = express.Router();
 const schema = JSON.parse(await readFile(new URL('../form-schemas/class.json', import.meta.url)));
 const userSchema = JSON.parse(await readFile(new URL('../form-schemas/user.json', import.meta.url)));
@@ -21,7 +22,11 @@ router.get('/classes',authMdw.auth,authMdw.authMemberUser, async function (req, 
   const list = await classMemberService.findAllClassesByUser(req.userId);
   res.status(200).json(list);
 });
-
+// router.get('/test',passport.authenticate('jwt', { session: false }), async function (req, res) {
+//   console.log(req.user.userId,req.user.roleUser);
+//   const list = await classMemberService.findAllClassesByUser(req.user.userId);
+//   res.status(200).json(list);
+// });
 router.post('/classes',authMdw.auth, validate(schema), async function (req, res) {
   //console.log('ROOT ROUTER: ', req.body);
   req.body.createdUser=req.userId;

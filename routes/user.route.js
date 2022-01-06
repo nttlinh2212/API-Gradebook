@@ -27,6 +27,7 @@ router.patch('/', async function (req, res) {
 });
 
 router.get('/profile',authMdw.auth, async function (req, res) {
+  console.log(req)
   const user = await userService.findByIdSelected(req.userId)
   res.status(200).json(user);
 });

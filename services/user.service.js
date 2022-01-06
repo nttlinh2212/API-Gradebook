@@ -3,7 +3,7 @@ import userModel from '../models/user.model.js';
 import moment from 'moment';
 
 const userService = {
-    async findByEmail(email) {
+    findByEmail(email) {
         return userModel.findOne({email});
     },
     async findByStudentId(studentId) {

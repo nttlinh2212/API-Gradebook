@@ -14,6 +14,7 @@ import authRouter from './routes/auth.route.js';
 import notiRouter from './routes/notification.route.js';
 import dotenv from "dotenv";
 import authMdw from './middlewares/auth.mdw.js';
+import  passport  from './middlewares/passport.js';
 
 const app = express();
 dotenv.config();
@@ -26,7 +27,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));
+app.use(passport.initialize());
 
 app.use('/',rootRouter);
 app.use('/auth/', authRouter);

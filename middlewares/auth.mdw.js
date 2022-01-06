@@ -4,31 +4,47 @@ import classMemberService from '../services/class-member.service.js';
 import userService from '../services/user.service.js';
 import classService from '../services/class.service.js';
 import requestService from '../services/request.service.js';
-
+import  passport  from '../middlewares/passport.js';
 
 dotenv.config();
 export default{
+  // auth(req,res,next){
+  //   const accessToken = req.headers['x-access-token'];
+  //   if (accessToken) {
+  //     try {
+  //       const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
+  //       //console.log(decoded);
+  //       req.userId = decoded.userId;
+  //       req.roleUser = decoded.role;
+  //       //console.log("userId:",req.userId);
+  //       next();
+  //     } catch (err) {
+  //       //console.log(err);
+  //       return res.status(401).json({
+  //         message: 'Invalid or expired access token.'
+  //       });
+  //     }
+  //   } else {
+  //     return res.status(401).json({
+  //       message: 'Access token is not found.'
+  //     });
+  //   }
+  // },
   auth(req,res,next){
-    const accessToken = req.headers['x-access-token'];
-    if (accessToken) {
-      try {
-        const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
-        //console.log(decoded);
-        req.userId = decoded.userId;
-        req.roleUser = decoded.role;
-        //console.log("userId:",req.userId);
-        next();
-      } catch (err) {
-        //console.log(err);
-        return res.status(401).json({
-          message: 'Invalid or expired access token.'
-        });
+    //return passport.authenticate('jwt', { session: false })(req,res,next);
+    passport.authenticate('jwt', {
+      session: false,
+   }, function(error,user,info) {
+      if (error || !user) {
+         return res.status(401).json({
+            message: 'Not found or Invalid or Expired access token.'
+         });
       }
-    } else {
-      return res.status(401).json({
-        message: 'Access token is not found.'
-      });
-    }
+      req.userId = user.userId;
+      req.roleUser = user.roleUser;
+      next();
+   })(req, res, next);
+
   },
   authAdminUser(req,res,next){
     if(req.roleUser!=="admin")

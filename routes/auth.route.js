@@ -9,7 +9,7 @@ import {OAuth2Client} from 'google-auth-library';
 import userService from '../services/user.service.js';
 import validate from '../middlewares/validate.mdw.js';
 import renderContentEmail from '../utils/email-template.js';
-
+import  passport  from '../middlewares/passport.js';
 
 dotenv.config();
 const router = express.Router();
@@ -24,55 +24,55 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const SECRET_KEY_INVITE = process.env.SECRET_KEY_INVITE;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
-router.post('/', validate(schema), async function (req, res) {
-  const user = await userService.findByEmail(req.body.email);
-  if (user === null) {
-    return res.status(400).json({
-      message:"Invalid email or password."
-    });
-  }
-  if (user.status === "disable") {
-    return res.status(410).json({
-      message:"This account is disable. Please contact Admin to recover this account."
-    });
-  }
-  if (!user.verified) {
-    return res.status(411).json({
-      message:"This email is not yet verified. Please verify this email to continue using the application."
-    });
-  }
-  if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
-    return res.status(400).json({
-      message:"Invalid email or password."
-    });
-  }
+// router.post('/', validate(schema), async function (req, res) {
+//   const user = await userService.findByEmail(req.body.email);
+//   if (user === null) {
+//     return res.status(400).json({
+//       message:"Invalid email or password."
+//     });
+//   }
+//   if (user.status === "disable") {
+//     return res.status(410).json({
+//       message:"This account is disable. Please contact Admin to recover this account."
+//     });
+//   }
+//   if (!user.verified) {
+//     return res.status(411).json({
+//       message:"This email is not yet verified. Please verify this email to continue using the application."
+//     });
+//   }
+//   if (bcrypt.compareSync(req.body.password, user.password||"") === false) {
+//     return res.status(400).json({
+//       message:"Invalid email or password."
+//     });
+//   }
 
-  const opts = {
-    expiresIn: 30 * 60 // seconds
-  };
-  const payload = {
-    userId: user.id,
-    role: user.role,
-  };
-  const accessToken = jwt.sign(payload,SECRET_KEY, opts);
+//   const opts = {
+//     expiresIn: 30 * 60 // seconds
+//   };
+//   const payload = {
+//     userId: user.id,
+//     role: user.role,
+//   };
+//   const accessToken = jwt.sign(payload,SECRET_KEY, opts);
 
-  const refreshToken = randomstring.generate(80);
-  await userService.patch(user.id, {
-    rfToken: refreshToken
-  });
+//   const refreshToken = randomstring.generate(80);
+//   await userService.patch(user.id, {
+//     rfToken: refreshToken
+//   });
 
-  res.status(200).json({
-    authenticated: true,
-    _id:user._id,
-    firstName:user.firstName,
-    lastName:user.lastName,
-    name:user.name,
-    email:user.email,
-    role:user.role,
-    accessToken,
-    refreshToken
-  });
-});
+//   res.status(200).json({
+//     authenticated: true,
+//     _id:user._id,
+//     firstName:user.firstName,
+//     lastName:user.lastName,
+//     name:user.name,
+//     email:user.email,
+//     role:user.role,
+//     accessToken,
+//     refreshToken
+//   });
+// });
 
 router.post('/refresh', validate(rfSchema), async function (req, res) {
   const { accessToken, refreshToken } = req.body;
@@ -372,5 +372,16 @@ router.post('/reset-pw/confirm', validate(resetPassSchema), async function (req,
  
 });
 
-
+router.post('/', validate(schema), (req,res,next) => {
+  //console.log(req.body);
+  passport.authenticate('local', function (err, user, info){
+  //console.log(user,info)
+  if(!user){
+    const code = info.code;
+    delete info.code;
+    return res.status(code).json(info);
+  }
+  return res.status(200).json(user);
+  })(req, res, next)
+});
 export default router;
