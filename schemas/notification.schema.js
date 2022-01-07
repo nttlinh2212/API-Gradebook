@@ -30,6 +30,10 @@ const notiSchema = new mongoose.Schema(
             ref: 'user',
             required: true,
         },
+        seen: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

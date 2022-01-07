@@ -7,6 +7,7 @@ import classMemberService from '../services/class-member.service.js';
 import authMdw from '../middlewares/auth.mdw.js';
 import userService from '../services/user.service.js';
 import bcrypt from 'bcryptjs';
+import notiService from '../services/notification.service.js';
 
 const router = express.Router();
 const schema = JSON.parse(
@@ -124,13 +125,13 @@ router.post('/register', validate(userSchema), async function (req, res) {
 //   });
 // });
 
-// router.patch('/:id', async function (req, res) {
-//   const id = req.params.id || 0;
-//   let classObj = req.body;
-//   const n = await classService.patch(id, classObj);
-//   res.json({
-//     affected: n
-//   });
+// router.patch('/test', async function (req, res) {
+
+//   const list = await notiService.findAll();
+//   for (const n of list) {
+//       await notiService.patch(n._id,{seen:true})
+//   }
+//   res.json(list);
 // });
 
 export default router;
