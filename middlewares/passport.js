@@ -164,15 +164,32 @@ passport.use(
                                 'This account is disable. Please contact Admin to recover this account.',
                         });
                     }
-                    if (!exist.verified) {
+                    if (exist1 && exist1.status && exist1.status === 'disable') {
+                        return done(null, false, {
+                            code: 410,
+                            message:
+                                'This account is disable. Please contact Admin to recover this account.',
+                        });
+                    }
+                    if (exist&&!exist.verified) {
                         await userService.patch(exist._id, { verified: true });
                     }
-                    userId = exist._id;
-                    firstName = exist.firstName;
-                    lastName = exist.lastName;
-                    name = exist.name;
-                    email = exist.email;
-                    role = exist.role;
+                    if(exist){
+                        userId = exist._id;
+                        firstName = exist.firstName;
+                        lastName = exist.lastName;
+                        name = exist.name;
+                        email = exist.email;
+                        role = exist.role;
+                    }else if(exist1){
+                        userId = exist1._id;
+                        firstName = exist1.firstName;
+                        lastName = exist1.lastName;
+                        name = exist1.name;
+                        email = exist1.email;
+                        role = exist1.role;
+                    }
+                    
                 }
 
                 const opts = {

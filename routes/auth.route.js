@@ -418,7 +418,12 @@ router.post('/', validate(schema), (req, res, next) => {
 });
 router.post('/facebook', validate(accessTokenSchema), (req, res, next) => {
     passport.authenticate('facebookToken', function (err, user, info) {
-        console.log(err, info);
+        //console.log(err, info);
+        if (err){
+            return res.status(500).json({
+                message:"Something broke!"
+            });
+        }
         if (!user) {
             if (info && info.code) {
                 delete info.code;

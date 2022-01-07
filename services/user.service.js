@@ -2,8 +2,10 @@ import userModel from '../models/user.model.js';
 import moment from 'moment';
 
 const userService = {
-    findByEmail(email) {
-        return userModel.findOne({ email });
+    async findByEmail(email) {
+        if(!email)
+            return null;
+        return await userModel.findOne({ email });
     },
     findByFbId(id) {
         return userModel.findOne({ facebookId: id });
