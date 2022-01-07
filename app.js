@@ -30,6 +30,7 @@ app.use(
             'https://gradebookplus-btn02.netlify.app',
             'https://gradebookplus-final.netlify.app',
             'https://gradebookplus.xyz',
+            'https://gallant-cori-eb6952.netlify.app'
         ],
         methods: 'GET,PATCH,POST,DELETE',
     })
