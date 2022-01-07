@@ -1,11 +1,11 @@
 {
     "type": "object",
     "properties": {
-        "studentId": {
+        "access_token": {
             "type": "string",
             "minLength": 1
         }
     },
-    "required": ["studentId"],
+    "required": ["access_token"],
     "additionalProperties": false
 }

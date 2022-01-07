@@ -1,25 +1,23 @@
 {
-  "type": "object",
-  "properties": {
-    "listStudents":{
-        "type":"array",
-        "items":{
-          "type":"object",
-          "properties": {
-              "studentId": {
-                "type": "string",
-                "minLength": 1
-              },
-              "fullName": {
-                "type": "string",
-                "minLength": 1
-              }
-          }
+    "type": "object",
+    "properties": {
+        "listStudents": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "fullName": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            }
         }
-    }
-  },
-  "required": [
-    "listStudents"
-  ],
-  "additionalProperties": false
+    },
+    "required": ["listStudents"],
+    "additionalProperties": false
 }
