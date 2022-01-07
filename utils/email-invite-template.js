@@ -1,6 +1,11 @@
-
-export default function renderContentEmail(nameInvitor,emailInvitor,className,link,role) {
-    return  `
+export default function renderContentEmail(
+    nameInvitor,
+    emailInvitor,
+    className,
+    link,
+    role
+) {
+    return `
     <!doctype html>
     <html>
       <head>
@@ -405,5 +410,5 @@ export default function renderContentEmail(nameInvitor,emailInvitor,className,li
           </tr>
         </table>
       </body>
-    </html>`
+    </html>`;
 }

@@ -1,29 +1,26 @@
 {
-  "type": "object",
-  "properties": {
-    "grades":{
-        "type":"array",
-        "items":{
-          "type":"object",
-          "properties": {
-              "studentId": {
-                "type": "string",
-                "minLength": 1
-              },
-              "grade": {
-                "type": "string",
-                "minLength": 1
-
-              }
-          }
+    "type": "object",
+    "properties": {
+        "grades": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "grade": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            }
+        },
+        "identity": {
+            "type": "string"
         }
     },
-    "identity":{
-      "type":"string"
-    }
-  },
-  "required": [
-    "grades","identity"
-  ],
-  "additionalProperties": false
+    "required": ["grades", "identity"],
+    "additionalProperties": false
 }

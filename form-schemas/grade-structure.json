@@ -1,29 +1,26 @@
 {
-  "type": "object",
-  "properties": {
-    "gradeStructure":{
-        "type":"array",
-        "items":{
-          "type":"object",
-          "properties": {
-              "name": {"type": "string"},
-              "point": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum":10
-              },
-              "identity": {"type": "string"},
-              "finalized": {
-                "type": "boolean",
-                "enum":[true,false]
-              }
-
-          }
+    "type": "object",
+    "properties": {
+        "gradeStructure": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "point": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 10
+                    },
+                    "identity": { "type": "string" },
+                    "finalized": {
+                        "type": "boolean",
+                        "enum": [true, false]
+                    }
+                }
+            }
         }
-    }
-  },
-  "required": [
-    "gradeStructure"
-  ],
-  "additionalProperties": false
+    },
+    "required": ["gradeStructure"],
+    "additionalProperties": false
 }

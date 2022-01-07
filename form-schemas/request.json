@@ -1,21 +1,19 @@
 {
-  "type": "object",
-  "properties": {
-    "class": {
-      "type": "string"
+    "type": "object",
+    "properties": {
+        "class": {
+            "type": "string"
+        },
+        "gradeIdentity": {
+            "type": "string"
+        },
+        "expectedGrade": {
+            "type": "number"
+        },
+        "explanation": {
+            "type": "string"
+        }
     },
-    "gradeIdentity": {
-      "type": "string"
-    },
-    "expectedGrade": {
-      "type": "number"
-    },
-    "explanation": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "class","gradeIdentity","expectedGrade","explanation"
-  ],
-  "additionalProperties": false
+    "required": ["class", "gradeIdentity", "expectedGrade", "explanation"],
+    "additionalProperties": false
 }

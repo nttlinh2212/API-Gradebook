@@ -1,6 +1,11 @@
-
-export default function renderContentEmail(title,description,contentBtn,expiredTime,link) {
-    return  `
+export default function renderContentEmail(
+    title,
+    description,
+    contentBtn,
+    expiredTime,
+    link
+) {
+    return `
     <!doctype html>
     <html>
       <head>
@@ -405,5 +410,5 @@ export default function renderContentEmail(title,description,contentBtn,expiredT
           </tr>
         </table>
       </body>
-    </html>`
+    </html>`;
 }

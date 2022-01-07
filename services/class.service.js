@@ -1,4 +1,3 @@
-
 import classModel from '../models/class.model.js';
 import userModel from '../models/user.model.js';
 import classMemberService from './class-member.service.js';
@@ -10,145 +9,153 @@ const classService = {
     findAll() {
         return classModel.find();
     },
-    async findAllHavingSelect(query,sort) {
+    async findAllHavingSelect(query, sort) {
         let ret = [];
-        const listClasses = await classModel.find(query).populate(
-            {
-                path:"createdUser",
-                select:{name:1,_id:1}
-            }).sort(sort);
+        const listClasses = await classModel
+            .find(query)
+            .populate({
+                path: 'createdUser',
+                select: { name: 1, _id: 1 },
+            })
+            .sort(sort);
         for (const c of listClasses) {
-            const students = await classMemberService.findAllStudentsInAClass(c._id);
+            const students = await classMemberService.findAllStudentsInAClass(
+                c._id
+            );
             const numOfStudents = students.length;
-            const teachers = await classMemberService.findAllTeachersInAClass(c._id);
+            const teachers = await classMemberService.findAllTeachersInAClass(
+                c._id
+            );
             const numOfTeachers = teachers.length;
             const obj = {
-                _id:c._id,
-                "name":c.name,
-                "status":c.status,
+                _id: c._id,
+                name: c.name,
+                status: c.status,
                 createdUser: c.createdUser,
                 numOfStudents,
                 numOfTeachers,
-                createdAt : moment(c.createdAt)
-                .zone("+07:00")
-                .format('YYYY-MM-DD HH:mm:ss')
-            }
+                createdAt: moment(c.createdAt)
+                    .zone('+07:00')
+                    .format('YYYY-MM-DD HH:mm:ss'),
+            };
             ret.push(obj);
         }
         return ret;
-        
     },
-    findOneGrade(classId,identity){
+    findOneGrade(classId, identity) {
         return classModel.findOne({
-            _id:classId,
-            'gradeStructure':{$elemMatch: {identity}}
-        
+            _id: classId,
+            gradeStructure: { $elemMatch: { identity } },
         });
     },
-    findOneGradeFinalize(classId,identity){
-        return classModel.findOne({
-            _id:classId,
-            'gradeStructure.identity': identity,
-            'gradeStructure.finalized': true,
-        },{_id: 0, gradeStructure: {$elemMatch: {identity,finalized:true}}})    
-        
-
+    findOneGradeFinalize(classId, identity) {
+        return classModel.findOne(
+            {
+                _id: classId,
+                'gradeStructure.identity': identity,
+                'gradeStructure.finalized': true,
+            },
+            {
+                _id: 0,
+                gradeStructure: { $elemMatch: { identity, finalized: true } },
+            }
+        );
     },
     // findDetailOneGrade(classId,identity){
     //     return classModel.findOne({
     //         _id:classId,
     //         'gradeStructure.identity': identity
     //     },{"gradeStructure.$":1})
-             
+
     // },
     async findById(classId) {
-        return classModel.findOne({_id:classId});
+        return classModel.findOne({ _id: classId });
     },
     async findByCode(code) {
-        return classModel.findOne({key:code});
+        return classModel.findOne({ key: code });
     },
-    async findByIdHavingSelect(classId,select) {
-        return classModel.findOne({_id:classId}).select(select);
+    async findByIdHavingSelect(classId, select) {
+        return classModel.findOne({ _id: classId }).select(select);
     },
-    async findStudentIdInListStudents(classId,studentId) {
+    async findStudentIdInListStudents(classId, studentId) {
         //User.findOne({'local.rooms': {$elemMatch: {name: req.body.username}}}
         return classModel.findOne({
-            _id:classId,
-            'listStudents':{$elemMatch: {studentId}}
-        
+            _id: classId,
+            listStudents: { $elemMatch: { studentId } },
         });
     },
-    async isCorrectKey(classId,key) {
-        return classModel.findOne({_id:classId, key});
+    async isCorrectKey(classId, key) {
+        return classModel.findOne({ _id: classId, key });
     },
     async findClassInfoById(classId) {
-        return classModel.findOne({_id:classId}).populate(
-            {
-                path:"createdUser",
-                select:{name:1,_id:1}
-            })
-            // .select({
-            //     createdAt: 0,
-            //     updatedAt: 0,
-            //     __v:0
-            // });
+        return classModel.findOne({ _id: classId }).populate({
+            path: 'createdUser',
+            select: { name: 1, _id: 1 },
+        });
+        // .select({
+        //     createdAt: 0,
+        //     updatedAt: 0,
+        //     __v:0
+        // });
     },
-    async findDetailClassInfoByIdWithRole(classId,role) {
+    async findDetailClassInfoByIdWithRole(classId, role) {
         const classObj = await this.findClassInfoById(classId);
-        if(!classObj)
-            return null;
-        if(role==="student"){
+        if (!classObj) return null;
+        if (role === 'student') {
             return {
-              _id:classObj._id,
-              name:classObj.name,
-              description:classObj.description,
-              createdUser:classObj.createdUser,
-              role
-            }
-            
+                _id: classObj._id,
+                name: classObj.name,
+                description: classObj.description,
+                createdUser: classObj.createdUser,
+                role,
+            };
         }
         return {
-            _id:classObj._id,
-            name:classObj.name,
-            description:classObj.description,
-            createdUser:classObj.createdUser,
+            _id: classObj._id,
+            name: classObj.name,
+            description: classObj.description,
+            createdUser: classObj.createdUser,
             role,
-            key:classObj.key,
-        }
+            key: classObj.key,
+        };
     },
     async add(classObj) {
-        const classDoc =  new classModel(classObj);
-        
+        const classDoc = new classModel(classObj);
+
         const ret = await classDoc.save();
-        if(!await classMemberService.add({user:classObj.createdUser, role: "teacher",class:ret._id}))
-            throw new Error("Can not add in collection classMember");
+        if (
+            !(await classMemberService.add({
+                user: classObj.createdUser,
+                role: 'teacher',
+                class: ret._id,
+            }))
+        )
+            throw new Error('Can not add in collection classMember');
         return ret;
     },
-    async addIfNotExistElseUpdate(condition,newInfo) {
-        return classModel.findOneAndUpdate(condition,newInfo,{
-            upsert:1
-        })
+    async addIfNotExistElseUpdate(condition, newInfo) {
+        return classModel.findOneAndUpdate(condition, newInfo, {
+            upsert: 1,
+        });
     },
 
     removeById(classId) {
-        return classModel.deleteOne({_id:classId})
+        return classModel.deleteOne({ _id: classId });
     },
-    update(condition,updatedObj){
-        return classModel.update(condition,updatedObj);
+    update(condition, updatedObj) {
+        return classModel.update(condition, updatedObj);
     },
     patch(classId, newObj) {
-        return classModel.updateOne({_id:classId},newObj);
+        return classModel.updateOne({ _id: classId }, newObj);
     },
     patchGeneral(condition, newObj) {
-        return classModel.updateOne(condition,newObj);
+        return classModel.updateOne(condition, newObj);
     },
-    async getGradesOfAllStudents(classId){
+    async getGradesOfAllStudents(classId) {
         const classInfo = await this.findById(classId);
-        if(!classInfo)
-            return[];
+        if (!classInfo) return [];
         const listStudents = classInfo.listStudents;
-        if(!listStudents)
-            return[];
+        if (!listStudents) return [];
         const gradeStructure = classInfo.gradeStructure;
         //console.log("GradeStructure OBJECT:",gradeStructure);
         let identity_point = new Map();
@@ -157,22 +164,22 @@ const classService = {
         let i = 0;
         for (const assign of gradeStructure) {
             let element = {};
-            if(assign.finalized){
+            if (assign.finalized) {
                 element = {
-                    name:assign.name,
-                    identity:assign.identity,
-                    finalized:assign.finalized,
-                    point:0,
-                }
-            }else{
+                    name: assign.name,
+                    identity: assign.identity,
+                    finalized: assign.finalized,
+                    point: 0,
+                };
+            } else {
                 element = {
-                    name:assign.name,
-                    identity:assign.identity,
-                    finalized:assign.finalized,
-                    point:null,
-                }
+                    name: assign.name,
+                    identity: assign.identity,
+                    finalized: assign.finalized,
+                    point: null,
+                };
             }
-            identity_point.set(assign.identity, assign.point);//point la poin of grade structure
+            identity_point.set(assign.identity, assign.point); //point la poin of grade structure
             identity_grade.set(assign.identity, i);
             sample.push(element);
             i++;
@@ -180,24 +187,26 @@ const classService = {
         let result = [];
         for (const s of listStudents) {
             let newObj = {};
-            newObj.studentId=s.studentId
+            newObj.studentId = s.studentId;
             //-----------------map to account----------------------------
-            const rawInfoStudent = await userService.findByStudentId(s.studentId)
+            const rawInfoStudent = await userService.findByStudentId(
+                s.studentId
+            );
             //console.log(rawInfoStudent);
-            if(rawInfoStudent){
-                if(await classMemberService.findARoleInAClass(rawInfoStudent._id,classId,"student")){
-                    newObj.account={
-                        _id:rawInfoStudent._id,
-                        name:rawInfoStudent.name,
+            if (rawInfoStudent) {
+                if (
+                    await classMemberService.findARoleInAClass(
+                        rawInfoStudent._id,
+                        classId,
+                        'student'
+                    )
+                ) {
+                    newObj.account = {
+                        _id: rawInfoStudent._id,
+                        name: rawInfoStudent.name,
                     };
-                }
-                else
-                newObj.account=null;
-            }
-                
-                
-            else
-                newObj.account=null;
+                } else newObj.account = null;
+            } else newObj.account = null;
             // newObj.account={
             //     name:,
             //     _id
@@ -205,39 +214,39 @@ const classService = {
             //-----------------done map to account-----------------------
             let total = 0;
             //let newGrades = [].concat(sample);
-            let newGrades = JSON.parse(JSON.stringify(sample))
+            let newGrades = JSON.parse(JSON.stringify(sample));
             //console.log("AFTER CLONE:",newGrades)
-            
-            const gradesOfAStudent = await gradeService.findGradesOfAStudent(s.studentId,classId);
+
+            const gradesOfAStudent = await gradeService.findGradesOfAStudent(
+                s.studentId,
+                classId
+            );
             //console.log("Grdae of A Student in db:",gradesOfAStudent);
             //console.log(identity_grade);
             //console.log(newGrades);
             for (const g of gradesOfAStudent) {
                 const exist = identity_grade.get(g.gradeIdentity);
-                if(exist===null || exist===undefined){
-                    continue
+                if (exist === null || exist === undefined) {
+                    continue;
                 }
-                    
+
                 //console.log(identity_grade.get(g.gradeIdentity));
                 newGrades[identity_grade.get(g.gradeIdentity)].point = g.point;
-                total+=identity_point.get(g.gradeIdentity)*g.point/10;
+                total += (identity_point.get(g.gradeIdentity) * g.point) / 10;
             }
             //console.log("Student OBJECT:",s);
             //console.log("NEW OBJECT:",newGrades);
             //console.log("TOTAL GRADE:",total);
             newObj.grades = newGrades;
-            newObj.total=Math.round(total * 100) / 100;
-            result.push(newObj)
-            
+            newObj.total = Math.round(total * 100) / 100;
+            result.push(newObj);
         }
-        
-        return result;
 
+        return result;
     },
-    async getGradesOfAtudents(classId,studentId,flag){
+    async getGradesOfAtudents(classId, studentId, flag) {
         const classInfo = await this.findById(classId);
-        if(!classInfo)
-            return[];
+        if (!classInfo) return [];
         const gradeStructure = classInfo.gradeStructure;
         //console.log("GradeStructure OBJECT:",gradeStructure);
         let identity_point = new Map();
@@ -249,41 +258,42 @@ const classService = {
             //     continue;
             // }
             let element = {};
-            if(assign.finalized){
+            if (assign.finalized) {
                 element = {
-                    name:assign.name,
-                    identity:assign.identity,
-                    finalized:assign.finalized,
-                    point:0,
-                }
-            }else{
+                    name: assign.name,
+                    identity: assign.identity,
+                    finalized: assign.finalized,
+                    point: 0,
+                };
+            } else {
                 element = {
-                    name:assign.name,
-                    identity:assign.identity,
-                    finalized:assign.finalized,
-                    point:null,
-                }
+                    name: assign.name,
+                    identity: assign.identity,
+                    finalized: assign.finalized,
+                    point: null,
+                };
             }
-            if(flag){
-                element.pointStructure=assign.point;
+            if (flag) {
+                element.pointStructure = assign.point;
             }
-            identity_point.set(assign.identity, assign.point);//point la poin of grade structure
+            identity_point.set(assign.identity, assign.point); //point la poin of grade structure
             identity_grade.set(assign.identity, i);
             sample.push(element);
             i++;
         }
 
-        
         let newObj = {};
-        newObj.studentId=studentId
+        newObj.studentId = studentId;
         //-----------------map to account----------------------------
-        const rawInfoStudent = await classMemberService.findInfoStudentByStudentId(studentId,classId)
+        const rawInfoStudent =
+            await classMemberService.findInfoStudentByStudentId(
+                studentId,
+                classId
+            );
         //console.log("Raw info student:",rawInfoStudent, studentId, classId)
         //console.log(rawInfoStudent);
-        if(rawInfoStudent)
-            newObj.account=rawInfoStudent.user;
-        else
-            newObj.account=null;
+        if (rawInfoStudent) newObj.account = rawInfoStudent.user;
+        else newObj.account = null;
         // newObj.account={
         //     name:,
         //     _id
@@ -293,40 +303,37 @@ const classService = {
         //let newGrades = [].concat(sample);
         let newGrades = sample;
         //console.log("AFTER CLONE:",newGrades)
-        
-        const gradesOfAStudent = await gradeService.findGradesOfAStudent(studentId,classId);
+
+        const gradesOfAStudent = await gradeService.findGradesOfAStudent(
+            studentId,
+            classId
+        );
         //console.log("Grdae of A Student in db:",gradesOfAStudent);
         for (const g of gradesOfAStudent) {
             const exist = identity_grade.get(g.gradeIdentity);
-            if(exist===null || exist===undefined){
-                continue
+            if (exist === null || exist === undefined) {
+                continue;
             }
             let element = newGrades[exist];
-            if(element){
-                if(flag&&!element.finalized){//la student va chua finalize -> null
+            if (element) {
+                if (flag && !element.finalized) {
+                    //la student va chua finalize -> null
                     element.point = null;
-                }
-                else{//la student va diem da finalize || giao vien
+                } else {
+                    //la student va diem da finalize || giao vien
                     element.point = g.point;
-                    total+=identity_point.get(g.gradeIdentity)*g.point/10;
+                    total +=
+                        (identity_point.get(g.gradeIdentity) * g.point) / 10;
                 }
-                
             }
-            
         }
         //console.log("Student OBJECT:",s);
         //console.log("NEW OBJECT:",newGrades);
         //console.log("TOTAL GRADE:",total);
         newObj.grades = newGrades;
-        newObj.total=Math.round(total * 100) / 100;
-            
-            
-        
+        newObj.total = Math.round(total * 100) / 100;
+
         return newObj;
-
-    }
-
-}
+    },
+};
 export default classService;
-
-
