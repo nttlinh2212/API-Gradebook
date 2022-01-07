@@ -1,4 +1,5 @@
 import notiModel from '../models/notification.model.js';
+import { broadcastAll } from '../ws.js';
 
 const notiService = {
     findAll() {
@@ -44,6 +45,7 @@ const notiService = {
             byUser: byUserId,
         });
         const ret = await notiDoc.save();
+        broadcastAll('noti', JSON.stringify(ret), userId);
         return ret;
     },
     async addNewReply(userId, userName, requestId, byUserId) {
@@ -55,6 +57,7 @@ const notiService = {
             byUser: byUserId,
         });
         const ret = await notiDoc.save();
+        broadcastAll('noti', JSON.stringify(ret), userId);
         return ret;
     },
     async addNewDecision(userId, username, requestId, byUserId) {
@@ -66,6 +69,7 @@ const notiService = {
             byUser: byUserId,
         });
         const ret = await notiDoc.save();
+        broadcastAll('noti', JSON.stringify(ret), userId);
         return ret;
     },
     async addNewRequest(userId, className, requestId, byUserId) {
@@ -77,6 +81,7 @@ const notiService = {
             byUser: byUserId,
         });
         const ret = await notiDoc.save();
+        broadcastAll('noti', JSON.stringify(ret), userId);
         return ret;
     },
     async add(notiObj) {
