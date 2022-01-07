@@ -3,8 +3,7 @@ import moment from 'moment';
 
 const userService = {
     async findByEmail(email) {
-        if(!email)
-            return null;
+        if (!email) return null;
         return await userModel.findOne({ email });
     },
     findByFbId(id) {
