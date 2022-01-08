@@ -60,7 +60,7 @@ router.get(
         );
         if (!classObj) {
             return res.status(404).json({
-                message: 'Not found class',
+                message: 'Not found class.',
             });
         }
         res.status(200).json(classObj);
@@ -504,6 +504,7 @@ router.post(
     '/:id/list-students',
     validate(listStudentsSchema),
     authMdw.auth,
+    authMdw.authMember,
     authMdw.authOwner,
     authMdw.class,
     async function (req, res) {

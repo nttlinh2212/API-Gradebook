@@ -59,7 +59,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
     console.log(err.stack);
     res.status(500).json({
-        error: 'Something broke!',
+        error: 'Something went wrong. Please try again.',
     });
 });
 await connectDB();

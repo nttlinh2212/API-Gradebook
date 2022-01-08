@@ -422,7 +422,7 @@ router.post('/facebook', validate(accessTokenSchema), (req, res, next) => {
         console.log(err, info);
         if (err) {
             return res.status(500).json({
-                message: 'Something broke!',
+                message: 'Something went wrong. Please try again.',
             });
         }
         if (!user) {
