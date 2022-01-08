@@ -54,4 +54,9 @@ router.post('/:id/seen', authMdw.auth, async function (req, res) {
     if (!noti.seen) await notiService.patch(req.params.id, { seen: true });
     return res.status(204).end();
 });
+router.post('/seen', authMdw.auth, async function (req, res) {
+    
+    await notiService.patchGeneral({user:req.userId}, { seen: true });
+    return res.status(204).end();
+});
 export default router;

@@ -136,7 +136,7 @@ const notiService = {
         return notiModel.updateOne({ _id: notiId }, newObj);
     },
     patchGeneral(condition, newObj) {
-        return notiModel.updateOne(condition, newObj);
+        return notiModel.updateMany(condition, newObj);
     },
     async addIfNotExistElseUpdate(condition, newInfo) {
         return notiModel.findOneAndUpdate(condition, newInfo, {
