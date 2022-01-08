@@ -504,8 +504,7 @@ router.post(
     '/:id/list-students',
     validate(listStudentsSchema),
     authMdw.auth,
-    authMdw.authMember,
-    authMdw.authTeacher,
+    authMdw.authOwner,
     authMdw.class,
     async function (req, res) {
         const classId = req.params.id || 0;

@@ -119,6 +119,18 @@ export default {
 
         next();
     },
+    async authOwner(req, res, next) {
+        // const participating = req.participating;
+        const id = req.params.id;
+        const classInfo = await classService.findById(id);
+        if (classInfo.createdUser+"" !== req.userId) {
+            return res.status(403).json({
+                message: 'You do not have permission to access this area!',
+            });
+        }
+
+        next();
+    },
     async class(req, res, next) {
         // const participating = req.participating;
         const id = req.params.id;
