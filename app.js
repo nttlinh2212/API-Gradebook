@@ -15,7 +15,7 @@ import notiRouter from './routes/notification.route.js';
 import dotenv from 'dotenv';
 import authMdw from './middlewares/auth.mdw.js';
 import passport from './middlewares/passport.js';
-import socketServer from './ws.js';
+import createWs from './ws.js';
 
 const app = express();
 dotenv.config();
@@ -64,6 +64,7 @@ app.use(function (err, req, res, next) {
 });
 await connectDB();
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, function () {
+const server = app.listen(PORT, function () {
     console.log(`Gradebook API is listening at http://localhost:${PORT}`);
 });
+createWs(server)
