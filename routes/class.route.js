@@ -63,6 +63,8 @@ router.get(
                 message: 'Not found class.',
             });
         }
+        if (classObj.createdUser._id+""===req.userId)
+            classObj.role = "owner";
         res.status(200).json(classObj);
     }
 );
