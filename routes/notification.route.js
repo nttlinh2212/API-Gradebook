@@ -16,7 +16,10 @@ router.get('/', authMdw.auth, async function (req, res) {
         });
     }
 
-    const ret = await notiService.findByUser(req.userId, limit);
+
+    let retObj = {};
+    retObj.notis = await notiService.findByUser(req.userId, limit);
+    retObj.numNoSeen = await notiService.countNotSeen(req.userId);
     // let ret = [];
     // if (raw) {
     //     for (const n of raw) {
@@ -34,7 +37,7 @@ router.get('/', authMdw.auth, async function (req, res) {
     //         ret.push(element);
     //     }
     // }
-    res.status(200).json(ret);
+    res.status(200).json(retObj);
 });
 router.post('/:id/seen', authMdw.auth, async function (req, res) {
     if (!req.params.id) {

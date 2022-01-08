@@ -20,7 +20,7 @@ export default function createWs(server) {
     
         jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
             if (err) {
-                ws.close();
+                ws.close(4001,"Your token is no longer valid. Please reauthenticate.");
             } else {
                 wsClients.set(token, ws);
                 //wsClients[token] = ws;
@@ -40,10 +40,7 @@ export default function createWs(server) {
             for (const [token, client] of wsClients.entries()) {
                 jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
                     if (err) {
-                        client.send(
-                            'Error: Your token is no longer valid. Please reauthenticate.'
-                        );
-                        client.close();
+                        client.close(4001,'Your token is no longer valid. Please reauthenticate.');
                     } else {
                         client.send(wsUserId + ': ' + data);
                     }
