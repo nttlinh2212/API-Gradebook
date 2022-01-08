@@ -16,25 +16,39 @@ router.get('/', authMdw.auth, async function (req, res) {
         });
     }
 
-    const raw = await notiService.findByUser(req.userId, limit);
-    let ret = [];
-    if (raw) {
-        for (const n of raw) {
-            const element = {
-                _id: n._id,
-                type: n.type,
-                classId: n.class,
-                requestId: n.request,
-                message: n.message,
-                byUser: n.byUser,
-                createdAt: moment(n.createdAt)
-                    .zone('+07:00')
-                    .format('YYYY-MM-DD HH:mm:ss'),
-            };
-            ret.push(element);
-        }
-    }
+    const ret = await notiService.findByUser(req.userId, limit);
+    // let ret = [];
+    // if (raw) {
+    //     for (const n of raw) {
+    //         const element = {
+    //             _id: n._id,
+    //             type: n.type,
+    //             classId: n.class,
+    //             requestId: n.request,
+    //             message: n.message,
+    //             byUser: n.byUser,
+    //             createdAt: moment(n.createdAt)
+    //                 .zone('+07:00')
+    //                 .format('YYYY-MM-DD HH:mm:ss'),
+    //         };
+    //         ret.push(element);
+    //     }
+    // }
     res.status(200).json(ret);
 });
-
+router.post('/:id/seen', authMdw.auth, async function (req, res) {
+    if (!req.params.id) {
+        return res.status(400).json({
+            message: 'Invalid id.',
+        });
+    }
+    const noti = await notiService.findById(req.params.id);
+    if (!noti) {
+        return res.status(404).json({
+            message: 'Not found.',
+        });
+    }
+    if (!noti.seen) await notiService.patch(req.params.id, { seen: true });
+    return res.status(204).end();
+});
 export default router;

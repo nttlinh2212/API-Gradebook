@@ -408,8 +408,9 @@ router.post('/', validate(schema), (req, res, next) => {
         //console.log(user,info)
         if (!user) {
             if (info && info.code) {
+                const code = info.code;
                 delete info.code;
-                return res.status(info.code).json(info);
+                return res.status(code).json(info);
             }
             return res.status(400).json(info);
         }
@@ -426,8 +427,9 @@ router.post('/facebook', validate(accessTokenSchema), (req, res, next) => {
         }
         if (!user) {
             if (info && info.code) {
+                const code = info.code;
                 delete info.code;
-                return res.status(info.code).json(info);
+                return res.status(code).json(info);
             }
             return res.status(400).json(info);
         }

@@ -15,6 +15,7 @@ import notiRouter from './routes/notification.route.js';
 import dotenv from 'dotenv';
 import authMdw from './middlewares/auth.mdw.js';
 import passport from './middlewares/passport.js';
+import socketServer from './ws.js';
 
 const app = express();
 dotenv.config();

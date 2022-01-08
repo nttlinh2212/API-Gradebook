@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import classMemberService from '../services/class-member.service.js';
 import userService from '../services/user.service.js';
