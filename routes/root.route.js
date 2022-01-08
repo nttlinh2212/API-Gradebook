@@ -71,7 +71,7 @@ router.post('/classes/join', authMdw.auth, async function (req, res) {
             id,
             participating.role
         );
-        res.status(200).json(classObj);
+        return res.status(200).json(classObj);
     }
     //-----------if not join class
     const ret = await classMemberService.add({

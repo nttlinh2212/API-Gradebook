@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
 import url from 'url';
-const WS_PORT = 9000;
+const WS_PORT = process.env.WS_PORT;
 
 const wss = new WebSocketServer({
     port: WS_PORT,

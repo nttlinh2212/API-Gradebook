@@ -225,6 +225,8 @@ const classService = {
             //console.log(identity_grade);
             //console.log(newGrades);
             for (const g of gradesOfAStudent) {
+                if(g.point===null)
+                    continue
                 const exist = identity_grade.get(g.gradeIdentity);
                 if (exist === null || exist === undefined) {
                     continue;
@@ -257,6 +259,7 @@ const classService = {
             // if(flag &&!assign.finalized){
             //     continue;
             // }
+            //console.log("Assgine",assign)
             let element = {};
             if (assign.finalized) {
                 element = {
@@ -273,6 +276,7 @@ const classService = {
                     point: null,
                 };
             }
+            //console.log("element",element)
             if (flag) {
                 element.pointStructure = assign.point;
             }
@@ -310,6 +314,8 @@ const classService = {
         );
         //console.log("Grdae of A Student in db:",gradesOfAStudent);
         for (const g of gradesOfAStudent) {
+            if(g.point===null)
+                continue;
             const exist = identity_grade.get(g.gradeIdentity);
             if (exist === null || exist === undefined) {
                 continue;
@@ -321,6 +327,7 @@ const classService = {
                     element.point = null;
                 } else {
                     //la student va diem da finalize || giao vien
+                    //console.log(g.point);
                     element.point = g.point;
                     total +=
                         (identity_point.get(g.gradeIdentity) * g.point) / 10;

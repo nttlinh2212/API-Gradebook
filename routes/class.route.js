@@ -114,7 +114,7 @@ router.get(
                 id,
                 participating.role
             );
-            res.status(200).json(classObj);
+            return res.status(200).json(classObj);
         }
 
         const isCorrect = await classService.isCorrectKey(id, key);
@@ -358,7 +358,7 @@ router.post(
                 id,
                 participating.role
             );
-            res.status(200).json(classObj);
+            return res.status(200).json(classObj);
         }
 
         const decoded = jwt.verify(token, SECRET_KEY_INVITE);
