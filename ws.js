@@ -3,10 +3,10 @@ import jwt from 'jsonwebtoken';
 import url from 'url';
 const WS_PORT = process.env.PORT;
 
-
+let wss = null;
 
 export default function createWs(server) {
-    const wss = new WebSocketServer({
+    wss = new WebSocketServer({
         server
         //port: WS_PORT,
     });
