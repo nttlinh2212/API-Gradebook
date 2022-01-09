@@ -137,7 +137,7 @@ const notiService = {
         let retObj = {};
         retObj.notis = await this.findByUser(userId, 5);
         retObj.numNoSeen = await this.countNotSeen(userId);
-        broadcastAll('noti', retObj, userId);
+        broadcastAll('seen', retObj, userId);
         return ret;
     },
     async patchSeenGeneral(condition, newObj, userId) {
@@ -145,7 +145,7 @@ const notiService = {
         let retObj = {};
         retObj.notis = await this.findByUser(userId, 5);
         retObj.numNoSeen = await this.countNotSeen(userId);
-        broadcastAll('noti', retObj, userId);
+        broadcastAll('seen', retObj, userId);
         return ret;
     },
     async addIfNotExistElseUpdate(condition, newInfo) {
