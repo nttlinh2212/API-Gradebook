@@ -7,7 +7,7 @@ let wss = null;
 
 export default function createWs(server) {
     wss = new WebSocketServer({
-        server
+        server,
         //port: WS_PORT,
     });
     console.log('new wss');
@@ -15,12 +15,15 @@ export default function createWs(server) {
     //var wsClients_userId = [];
     wss.on('connection', function connection(ws, req) {
         var token = url.parse(req.url, true).query.token;
-    
+
         var wsUserId = '';
-    
+
         jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
             if (err) {
-                ws.close(4001,"Your token is no longer valid. Please reauthenticate.");
+                ws.close(
+                    4001,
+                    'Your token is no longer valid. Please reauthenticate.'
+                );
             } else {
                 wsClients.set(token, ws);
                 //wsClients[token] = ws;
@@ -34,13 +37,16 @@ export default function createWs(server) {
             }
         });
         console.log(`Client ${wsUserId} connects successfully.`);
-    
+
         ws.on('message', function (data) {
             //console.log('received: %s', message);
             for (const [token, client] of wsClients.entries()) {
                 jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
                     if (err) {
-                        client.close(4001,'Your token is no longer valid. Please reauthenticate.');
+                        client.close(
+                            4001,
+                            'Your token is no longer valid. Please reauthenticate.'
+                        );
                     } else {
                         client.send(wsUserId + ': ' + data);
                     }
@@ -52,7 +58,7 @@ export default function createWs(server) {
         });
         //ws.send('something');
     });
-    
+
     // socketServer.on('connection', function(client){
     //     console.log("Client connects successfully.");
     // })
@@ -82,4 +88,3 @@ export function broadcastAll(event, data, userId) {
     //     }
     // }
 }
-

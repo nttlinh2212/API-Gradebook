@@ -132,11 +132,21 @@ const notiService = {
         return notiModel.deleteOne({ _id: notiId });
     },
 
-    patch(notiId, newObj) {
-        return notiModel.updateOne({ _id: notiId }, newObj);
+    async patchSeen(notiId, newObj, userId) {
+        const ret = await notiModel.updateOne({ _id: notiId }, newObj);
+        let retObj = {};
+        retObj.notis = await this.findByUser(userId, 5);
+        retObj.numNoSeen = await this.countNotSeen(userId);
+        broadcastAll('noti', retObj, userId);
+        return ret;
     },
-    patchGeneral(condition, newObj) {
-        return notiModel.updateMany(condition, newObj);
+    async patchSeenGeneral(condition, newObj, userId) {
+        const ret = await notiModel.updateMany(condition, newObj);
+        let retObj = {};
+        retObj.notis = await this.findByUser(userId, 5);
+        retObj.numNoSeen = await this.countNotSeen(userId);
+        broadcastAll('noti', retObj, userId);
+        return ret;
     },
     async addIfNotExistElseUpdate(condition, newInfo) {
         return notiModel.findOneAndUpdate(condition, newInfo, {

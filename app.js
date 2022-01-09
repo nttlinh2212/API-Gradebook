@@ -31,7 +31,7 @@ app.use(
             'https://gradebookplus-btn02.netlify.app',
             'https://gradebookplus-final.netlify.app',
             'https://gradebookplus.xyz',
-            'https://gallant-cori-eb6952.netlify.app'
+            'https://gallant-cori-eb6952.netlify.app',
         ],
         methods: 'GET,PATCH,POST,DELETE',
     })
@@ -67,4 +67,4 @@ const PORT = process.env.PORT || 4000;
 const server = app.listen(PORT, function () {
     console.log(`Gradebook API is listening at http://localhost:${PORT}`);
 });
-createWs(server)
+createWs(server);

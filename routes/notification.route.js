@@ -16,7 +16,6 @@ router.get('/', authMdw.auth, async function (req, res) {
         });
     }
 
-
     let retObj = {};
     retObj.notis = await notiService.findByUser(req.userId, limit);
     retObj.numNoSeen = await notiService.countNotSeen(req.userId);
@@ -51,12 +50,16 @@ router.post('/:id/seen', authMdw.auth, async function (req, res) {
             message: 'Not found.',
         });
     }
-    if (!noti.seen) await notiService.patch(req.params.id, { seen: true });
+    if (!noti.seen)
+        await notiService.patchSeen(req.params.id, { seen: true }, req.userId);
     return res.status(204).end();
 });
 router.post('/seen', authMdw.auth, async function (req, res) {
-    
-    await notiService.patchGeneral({user:req.userId}, { seen: true });
+    await notiService.patchSeenGeneral(
+        { user: req.userId },
+        { seen: true },
+        req.userId
+    );
     return res.status(204).end();
 });
 export default router;

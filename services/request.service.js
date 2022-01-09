@@ -45,7 +45,7 @@ const requestService = {
             let element = {
                 _id: list[i]._id,
                 class: list[i].class,
-                curGrade: list[i].curGrade||0,
+                curGrade: list[i].curGrade || 0,
                 expectedGrade: list[i].expectedGrade,
                 explanation: list[i].explanation,
                 status: list[i].status,
@@ -118,7 +118,7 @@ const requestService = {
                 _id: list[i]._id,
                 class: list[i].class,
                 student: list[i].student,
-                curGrade: list[i].curGrade||0,
+                curGrade: list[i].curGrade || 0,
                 expectedGrade: list[i].expectedGrade,
                 explanation: list[i].explanation,
                 status: list[i].status,
@@ -179,7 +179,7 @@ const requestService = {
             _id: raw._id,
             class: raw.class,
             student: raw.student,
-            curGrade: raw.curGrade||0,
+            curGrade: raw.curGrade || 0,
             expectedGrade: raw.expectedGrade,
             explanation: raw.explanation,
             status: raw.status,
@@ -219,7 +219,8 @@ const requestService = {
             studentId,
             reqObj.gradeIdentity
         );
-        const curGrade = (composition&&composition.point) ? composition.point : 0;
+        const curGrade =
+            composition && composition.point ? composition.point : 0;
         reqObj.curGrade = curGrade;
         //console.log(reqObj);
         const reqDoc = new requestModel(reqObj);

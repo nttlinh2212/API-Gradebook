@@ -225,8 +225,7 @@ const classService = {
             //console.log(identity_grade);
             //console.log(newGrades);
             for (const g of gradesOfAStudent) {
-                if(g.point===null)
-                    continue
+                if (g.point === null) continue;
                 const exist = identity_grade.get(g.gradeIdentity);
                 if (exist === null || exist === undefined) {
                     continue;
@@ -314,8 +313,7 @@ const classService = {
         );
         //console.log("Grdae of A Student in db:",gradesOfAStudent);
         for (const g of gradesOfAStudent) {
-            if(g.point===null)
-                continue;
+            if (g.point === null) continue;
             const exist = identity_grade.get(g.gradeIdentity);
             if (exist === null || exist === undefined) {
                 continue;

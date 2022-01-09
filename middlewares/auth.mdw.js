@@ -89,7 +89,7 @@ export default {
         if (participating) {
             //req.partId = participating._id;
             req.role = participating.role;
-            
+
             //req.participating = participating;
             next();
         } else
@@ -124,8 +124,8 @@ export default {
         // const participating = req.participating;
         const id = req.params.id;
         const classInfo = await classService.findById(id);
-        if (classInfo.createdUser+"" === req.userId) {
-            req.role = "owner"
+        if (classInfo.createdUser + '' === req.userId) {
+            req.role = 'owner';
         }
         if (!(req.role === 'owner')) {
             return res.status(403).json({
