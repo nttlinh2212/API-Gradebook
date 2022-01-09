@@ -696,12 +696,14 @@ router.patch(
             point,
         };
         await gradeService.addIfNotExistElseUpdate(condition, newInfo);
-        //------------------------------get info grades of student to return--------------
-        const ret = await classService.getGradesOfAtudents(
-            classId,
-            studentId,
-            false
-        );
+        // //------------------------------get info grades of student to return--------------
+        // const ret = await classService.getGradesOfAtudents(
+        //     classId,
+        //     studentId,
+        //     false
+        // );
+        //------------------------------get info grades of all student to return--------------
+        const ret = await classService.getGradesOfAllStudents(classId);
         res.status(201).json(ret);
     }
 );

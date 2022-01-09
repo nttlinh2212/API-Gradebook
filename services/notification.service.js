@@ -66,7 +66,7 @@ const notiService = {
         const notiDoc = new notiModel({
             user: userId,
             type: 'finalize',
-            message: `The teacher posted new grade in class ${className}`,
+            message: `The teacher posted new grade in class ${className}.`,
             class: classId,
             byUser: byUserId,
         });
@@ -81,7 +81,7 @@ const notiService = {
         const notiDoc = new notiModel({
             user: userId,
             type: 'reply',
-            message: `Teacher ${userName} commented in your request review`,
+            message: `Teacher ${userName} commented in your request review.`,
             request: requestId,
             byUser: byUserId,
         });
@@ -96,7 +96,7 @@ const notiService = {
         const notiDoc = new notiModel({
             user: userId,
             type: 'decision',
-            message: `Your request review is closed by teacher ${username}. See your final mark`,
+            message: `Your request review is closed by teacher ${username}. See your final mark.`,
             request: requestId,
             byUser: byUserId,
         });
@@ -111,7 +111,7 @@ const notiService = {
         const notiDoc = new notiModel({
             user: userId,
             type: 'request',
-            message: `You have a request review in class ${className}`,
+            message: `You have a request review in class ${className}.`,
             request: requestId,
             byUser: byUserId,
         });
