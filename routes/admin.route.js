@@ -62,7 +62,7 @@ router.get('/users', validate(queryUserSchema), async function (req, res) {
     //         users[i].numClassStudent = await classMemberService.countJoinByRole(users[i]._id,"student");
     //     }
     // }
-    
+
     res.status(200).json(users);
 });
 router.delete('/users/:id', async function (req, res) {

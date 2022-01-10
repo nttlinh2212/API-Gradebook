@@ -19,16 +19,21 @@ const classService = {
             })
             .sort(sort);
         for (const c of listClasses) {
-            
-            const numOfStudents = await classMemberService.countAllRoleInAClass(c._id,"student");
-            const numOfTeachers = await classMemberService.countAllRoleInAClass(c._id,"teacher")
+            const numOfStudents = await classMemberService.countAllRoleInAClass(
+                c._id,
+                'student'
+            );
+            const numOfTeachers = await classMemberService.countAllRoleInAClass(
+                c._id,
+                'teacher'
+            );
             const obj = {
                 _id: c._id,
                 name: c.name,
-                description:c.description,
+                description: c.description,
                 status: c.status,
                 createdUser: c.createdUser,
-                key:c.key,
+                key: c.key,
                 numOfStudents,
                 //students:students,
                 numOfTeachers,
