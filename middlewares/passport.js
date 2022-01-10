@@ -54,7 +54,7 @@ passport.use(
             }
 
             const opts = {
-                expiresIn: 30 * 60, // seconds
+                expiresIn: process.env.TOKEN_EXPIRE * 60, // seconds
             };
             const payload = {
                 userId: user.id,
@@ -196,7 +196,7 @@ passport.use(
                 }
 
                 const opts = {
-                    expiresIn: 30 * 60, // seconds
+                    expiresIn: process.env.TOKEN_EXPIRE * 60, // seconds
                 };
                 const payload = {
                     userId,

@@ -64,12 +64,14 @@ router.post(
                 isComposition.gradeStructure.length === 0
             ) {
                 return res.status(400).json({
-                    message: 'Invalid classId or gradeIdentity or gradeIdentity is not yet finalized.',
+                    message:
+                        'Invalid classId or gradeIdentity or gradeIdentity is not yet finalized.',
                 });
             }
         } catch (err) {
             return res.status(400).json({
-                message: 'nvalid classId or gradeIdentity or gradeIdentity is not yet finalized.',
+                message:
+                    'nvalid classId or gradeIdentity or gradeIdentity is not yet finalized.',
             });
         }
 

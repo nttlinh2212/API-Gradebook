@@ -99,13 +99,14 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
         //console.log("Sign successfully",userId);
         const ret = await userService.isValidRefreshToken(userId, refreshToken);
         if (ret) {
-            if (ret.status === "disable"){
+            if (ret.status === 'disable') {
                 return res.status(413).json({
-                    message: 'Your account is disable. Please contact Admin to recover this account.',
+                    message:
+                        'Your account is disable. Please contact Admin to recover this account.',
                 });
             }
             const opts = {
-                expiresIn: 30 * 60, // seconds
+                expiresIn: process.env.TOKEN_EXPIRE * 60, // seconds
             };
             const payload = { userId, role };
             const new_accessToken = jwt.sign(payload, SECRET_KEY, opts);
@@ -189,7 +190,7 @@ router.post('/google', validate(tokenSchema), async function (req, res) {
     }
 
     const opts = {
-        expiresIn: 30 * 60, // seconds
+        expiresIn: process.env.TOKEN_EXPIRE * 60, // seconds
     };
     const payload = {
         userId,
