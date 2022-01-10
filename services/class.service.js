@@ -30,10 +30,14 @@ const classService = {
             const obj = {
                 _id: c._id,
                 name: c.name,
+                description:c.description,
                 status: c.status,
                 createdUser: c.createdUser,
+                key:c.key,
                 numOfStudents,
+                students:students,
                 numOfTeachers,
+                teachers:teachers,
                 createdAt: moment(c.createdAt)
                     .zone('+07:00')
                     .format('YYYY-MM-DD HH:mm:ss'),

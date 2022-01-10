@@ -79,11 +79,11 @@ const classMemberService = {
                 select: {
                     _id: 1,
                     name: 1,
+                    studentId: 1,
                 },
             })
             .select({
-                _id: 1,
-                studentId: 1,
+                _id: 1
             });
     },
     findAllTeachersInAClass(classId) {
