@@ -68,6 +68,12 @@ const classMemberService = {
             role,
         });
     },
+    async countJoinByRole(memberId, role) {
+        return classMemberModel.countDocuments({
+            user: memberId,
+            role,
+        });
+    },
     async findAllStudentsInAClass(classId) {
         return classMemberModel
             .find({

@@ -99,6 +99,11 @@ router.post('/refresh', validate(rfSchema), async function (req, res) {
         //console.log("Sign successfully",userId);
         const ret = await userService.isValidRefreshToken(userId, refreshToken);
         if (ret) {
+            if (ret.status === "disable"){
+                return res.status(413).json({
+                    message: 'Your account is disable. Please contact Admin to recover this account.',
+                });
+            }
             const opts = {
                 expiresIn: 30 * 60, // seconds
             };

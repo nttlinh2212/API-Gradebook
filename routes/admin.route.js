@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import userService from '../services/user.service.js';
 import validate from '../middlewares/validate.mdw.js';
 import classService from '../services/class.service.js';
+import classMemberService from '../services/class-member.service.js';
 const userSchema = JSON.parse(
     await readFile(new URL('../form-schemas/user.json', import.meta.url))
 );
@@ -55,7 +56,10 @@ router.get('/users', validate(queryUserSchema), async function (req, res) {
             createdAt: sort,
         }
     );
-
+    for(let i=0;i<users.length;i++){
+        users[i].numClassTeacher = await classMemberService.countJoinByRole(users[i]._id,"teacher");
+        users[i].numClassStudent = await classMemberService.countJoinByRole(users[i]._id,"student");
+    }
     res.status(200).json(users);
 });
 router.delete('/users/:id', async function (req, res) {

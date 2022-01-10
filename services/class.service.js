@@ -35,9 +35,9 @@ const classService = {
                 createdUser: c.createdUser,
                 key:c.key,
                 numOfStudents,
-                students:students,
+                //students:students,
                 numOfTeachers,
-                teachers:teachers,
+                //teachers:teachers,
                 createdAt: moment(c.createdAt)
                     .zone('+07:00')
                     .format('YYYY-MM-DD HH:mm:ss'),
