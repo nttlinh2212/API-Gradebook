@@ -92,6 +92,13 @@ const classMemberService = {
                 _id: 1
             });
     },
+    async countAllRoleInAClass(classId,role) {
+        return classMemberModel
+            .countDocuments({
+                class: classId,
+                role,
+            })
+    },
     findAllTeachersInAClass(classId) {
         return classMemberModel
             .find({
